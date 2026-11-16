@@ -175,13 +175,13 @@ The [container PoC](docs/architecture/part-2-poc.md) includes exact isolated
 Compose commands and recorded results: 640 patents indexed, idempotent reimport
 and HTTP checks from image code. No AWS deployment is required by this PoC.
 
-## Part 3 — Interface at Scale (incomplete)
+## Part 3 — Interface at Scale
 
 Selected to let reviewers narrow a result set without losing context between
 views. The approved design is a results list, classification drill-down and weekly
 timeline sharing filters and counts, with stale-response protection.
 
-To run the **visual preview only** (no backend required):
+After the Part 1 setup (API running, sample ingested and index rebuilt):
 
 ```sh
 make frontend-install
@@ -190,9 +190,12 @@ make frontend-dev
 
 Requires Node.js 22.12+ and npm. Open `http://127.0.0.1:5173`.
 [Frontend commands and proxy details](frontend/README.md).
-The data API is implemented at `/api/v1/patents/explore`; the preview does not
-consume it yet. It returns results, filtered classification counts and **Source
-week** counts in one PostgreSQL snapshot. Source week is a source-batch date,
+The frontend consumes `/api/v1/patents/explore`. Results, classification
+drill-down and a selectable weekly distribution share filters and one response.
+Click a classification, week or result-card metadata button to filter all views.
+Active filters are individually removable; new queries keep the other filters.
+Advanced filters include inclusive date bounds and title/abstract constraints.
+All API counts share one PostgreSQL snapshot. Source week is a source-batch date,
 not a verified legal filing date.
 
 After the Part 1 setup, try the endpoint independently:
@@ -209,8 +212,30 @@ Omit query/filters to browse all patents. Counts cover all filtered matches,
 not only the page. [Exploration contract](docs/decisions/005-enhancement.md).
 The live sample has 640 patents in 64 source weeks; existing `wheel spoke`
 counts remain 114 (55 with classification `B60B` and title token `wheel`).
-Linked views, frontend request-race tests and filter-to-render measurements are
-still outstanding; Part 1 timings do not satisfy Part 3.
+The client clears old views during loading, cancels superseded requests and
+rejects older successes/errors by request ID, even if cancellation is ignored.
+Browser regressions cover these races, linked counts, filters, paging and
+loading/empty/error/retry behavior.
+`make frontend-unit-test` also runs four fast Vitest/jsdom integration tests
+with synthetic API responses, without starting any servers.
+
+Reproduce browser checks and timings:
+
+```sh
+make frontend-build
+make frontend-preview
+# Another terminal, API and preview running:
+make frontend-test
+```
+
+Requires Python 3 and local `agent-browser`; [setup](frontend/README.md).
+On **640 patents / 64 source weeks**, selecting `B60B` from browse
+(298 matches, 20 rendered results) took **50.0 ms median / 51.3 ms p95**:
+20 warm updates after 3 warmups, local production bundle, headless Chrome 155,
+Apple M1 / 8 GB Mac. Timing starts in the filter handler and ends at the second
+animation frame after linked-view commit, including API and a paint opportunity.
+This is not a remote-network or at-scale benchmark.
+[Method and raw measurements](docs/benchmarks/003-linked-interface.md).
 
 At 10 million patents, the interface would need server-side indexed filtering
 and aggregation over the same result set, bounded pagination and evidence work,
@@ -224,8 +249,8 @@ requirements, not implemented optimizations.
 - Python metadata scans, whole-sample ingestion and full index rebuilds are sample-scale.
   Vectors require explicit rebuilding; PostgreSQL full-text size/position limits
   matter for long documents.
-- To complete submission: implement and measure Part 3, document its reproducible
-  results, and add an accessible ~2-minute recording covering Parts 2 and 3.
+- To complete submission: final delivery review, push the code and add an
+  accessible ~2-minute recording covering Parts 2 and 3.
 
 Optional evidence: [architecture](docs/architecture/README.md),
 [benchmarks](docs/benchmarks/README.md), [decisions](docs/decisions/README.md),

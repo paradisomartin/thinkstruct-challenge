@@ -1,0 +1,47 @@
+{
+  "timestamp_utc": "2026-11-16T22:50:47.075203+00:00",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "machine": "arm64",
+  "url": "http://127.0.0.1:4173",
+  "results": {
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+    "dataset_patents": 640,
+    "max_ms": 65.89999999850988,
+    "measurement": "B60B selection from browse: event handler to second animation frame after linked-view commit",
+    "median_ms": 49.999999998137355,
+    "min_ms": 48.80000000074506,
+    "p95_ms": 51.30000000074506,
+    "passed": [
+      "Live browse, full-set linked counts and pagination",
+      "Text evidence, hierarchy drill-down, date selection, retained query filters and independent removal",
+      "Result-card filtering, empty state and real 422 validation",
+      "Loading isolation, stale success/error rejection even without abort, network error and retry",
+      "Reversed date range validation"
+    ],
+    "repetitions": 20,
+    "samples_ms": [
+      65.89999999850988,
+      48.80000000074506,
+      49.30000000074506,
+      49.39999999850989,
+      49.30000000074506,
+      49.39999999850989,
+      51.30000000074506,
+      50.69999999925494,
+      49.60000000149011,
+      49.89999999850989,
+      49.19999999925494,
+      50.89999999850989,
+      49.69999999925494,
+      50.599999997764826,
+      49.69999999925494,
+      50.099999997764826,
+      50.80000000074506,
+      50.69999999925494,
+      51.30000000074506,
+      50.60000000149011
+    ],
+    "source_weeks": 64,
+    "warmups": 3
+  }
+}

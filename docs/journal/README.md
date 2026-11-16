@@ -19,6 +19,7 @@ Approvals: [decisions](../decisions/README.md).
 | Part 2 PoC | [Isolated container ingestion](11-container-ingestion-poc.md) |
 | Frontend workspace | [Vite, React and TypeScript setup](12-react-workspace.md) |
 | Exploration API | [Versioned HTTP layer and consistent linked counts](13-exploration-api.md) |
+| Linked interface | [Live views, request races and browser measurements](14-linked-interface.md) |
 
 ## Delivery checklist
 
@@ -26,9 +27,8 @@ Approvals: [decisions](../decisions/README.md).
 - [x] Local health/OpenAPI, stage logging, Make workflow and automated tests
 - [x] Search/evidence/filter correctness and local measured latency comparison
 - [x] Part 2 architecture/cost assumptions and one designated PoC
-- [ ] Exactly one Part 3 enhancement and its validation
+- [x] Exactly one Part 3 enhancement and its sample-scale validation
 - [ ] Final reproducible README and accessible ~2-minute Part 2/3 video
 
-**Next:** Connect the React views to the verified exploration API, add stale-response
-protection and interaction measurements, then finish reproduction and the recording.
-No complete search UI, AWS deployment or at-scale validation yet.
+**Next:** Final delivery review, commit/push and accessible Part 2/3 recording.
+No AWS deployment or at-scale validation is claimed.

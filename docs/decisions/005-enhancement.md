@@ -7,7 +7,8 @@ Implement linked results, hierarchical classification counts and a weekly
 timeline, with shared filters, consistent counts and protection against stale
 responses. Verify source date semantics before presenting a filing timeline.
 Measure filter-to-render latency and document the dataset size and scale limits.
-The visual preview and API data contract do not yet satisfy the linked-view criteria.
+The three views are connected and browser-tested on the supplied sample;
+[measurements](../benchmarks/003-linked-interface.md).
 
 Use Vite + React + TypeScript inside `frontend/`, as explicitly approved.
 React fits shared interactive state; Vite keeps the client setup small.
@@ -16,8 +17,8 @@ Django remains the API; the development Vite proxy avoids adding CORS for now.
 
 The approved styling foundation uses Tailwind CSS 4's official Vite plugin and
 daisyUI 5's built-in `corporate` theme through CSS configuration. React owns
-behavior; daisyUI supplies styles, not search logic. The current UI is a visual
-preview with illustrative cards, not a completed linked-view enhancement.
+behavior; daisyUI supplies styles, not search logic. Visual refinements are
+deferred in favor of the live linked-view workflow.
 
 ## Accepted exploration contract
 
@@ -47,7 +48,10 @@ request browses all patents, ordered by document number.
 One read-only PostgreSQL `REPEATABLE READ` transaction covers eligibility,
 aggregation, ranking and evidence. This keeps one response internally coherent
 under concurrent writes; it does not freeze subsequent requests. The frontend
-must still reject stale responses and apply each response's views together.
+rejects stale responses by request ID as well as aborting superseded fetches.
+It clears old views when applied filters change, then commits all new views together.
+Loading/errors never retain previous counts. Active filters are independently
+removable; new text searches retain the other filters.
 Classification/date aggregation currently scans compact candidate metadata in
 Python. It needs persisted/indexed dates and database aggregation at larger scale.
 

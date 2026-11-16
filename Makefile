@@ -12,7 +12,7 @@ BRUNO_ENV ?= ThinkStruct Challenge Env
 PYTHON ?= python3.13
 
 .PHONY: help venv build db dev migrate makemigrations check test ingest reindex benchmark health openapi api-test logs status stop
-.PHONY: frontend-install frontend-dev frontend-check frontend-build frontend-preview
+.PHONY: frontend-install frontend-dev frontend-check frontend-build frontend-preview frontend-test frontend-unit-test
 
 help:
 	@printf '%s\n' \
@@ -23,6 +23,8 @@ help:
 	  'make frontend-check  Check frontend TypeScript' \
 	  'make frontend-build  Check and build the frontend for production' \
 	  'make frontend-preview Serve the built frontend locally on port 4173' \
+	  'make frontend-test   Browser checks/timing (requires API/sample and running preview)' \
+	  'make frontend-unit-test Run Vitest frontend integration tests (no servers required)' \
 	  'make migrate         Apply committed database migrations' \
 	  'make makemigrations  Generate migrations in backend/ (review before applying)' \
 	  'make check           Check Django configuration and model/migration consistency' \
@@ -107,6 +109,12 @@ frontend-install:
 
 frontend-dev:
 	@npm --prefix frontend run dev
+
+frontend-test:
+	@python3 frontend/tests/run_browser.py $(URL)
+
+frontend-unit-test:
+	@npm --prefix frontend test
 
 frontend-check:
 	@npm --prefix frontend run check

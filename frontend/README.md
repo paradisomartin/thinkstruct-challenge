@@ -1,9 +1,10 @@
 # Frontend — Patent search workspace
 
 Vite + React + TypeScript, selected for Part 3 **Interface at Scale**.
-The visual foundation includes a navbar, editable search/filter fields,
-illustrative patent cards and selectable empty/loading previews. Search is
-disabled: there are no API calls, linked views or interaction measurements yet.
+Three live views share `/api/v1/patents/explore`: results with original-text
+evidence, classification drill-down and a selectable source-week distribution.
+Active filters are individually removable; submitting a new query preserves
+the other filters. Keywords are space-separated AND terms.
 
 ## Run locally
 
@@ -24,8 +25,8 @@ npm run dev
 
 Open `http://127.0.0.1:5173`. Vite proxies `/api` to
 `http://127.0.0.1:8000`, so local API requests need no extra CORS configuration.
-The UI preview does not require Django. To use API routes, start the backend
-with `make dev` from the repository root. This is a development proxy, not a
+Start Django with `make dev` from the repository root, ingest the supplied sample
+and rebuild its index as described in the root README. This is a development proxy, not a
 production deployment configuration.
 If Django uses a different port, update the proxy target in `vite.config.ts`.
 
@@ -34,17 +35,56 @@ npm run check
 npm run build
 ```
 
-TypeScript and production build pass with the styling integration. Browser
-rendering, linked-view interactions and accessibility have not been independently
-tested.
+## Verification and measurements
 
-## Styling and preview behavior
+Fast integration tests (no Django, browser binary or running servers required):
+
+```sh
+make frontend-unit-test
+# Or from frontend/: npm test
+# Watch mode: npm run test:watch
+```
+
+Four Vitest + Testing Library tests render the full app in jsdom with mocked
+HTTP responses: linked classification/week filters, query/filter preservation
+and removal, empty/error/retry, and stale successes/errors despite ignored abort.
+Fixtures are synthetic. These are frontend integration tests, not full-stack E2E;
+the real-browser suite below verifies the live API and measures render updates.
+
+Use the supplied 640-patent sample and production bundle. From the repository root:
+
+```sh
+make frontend-build
+make frontend-preview
+# In another terminal, API and preview running:
+make frontend-test
+```
+
+The runner needs Python 3 and `agent-browser` (verified: 0.39.1).
+If absent, install with `npm install -g agent-browser`, then
+`agent-browser install` for browser binaries. This is a local tool, not an app dependency.
+`make frontend-test URL=http://127.0.0.1:5173` tests development mode;
+do not compare those timings directly with the production baseline.
+
+The runner creates/closes its own browser session and writes ignored
+`artifacts/frontend-exploration.json`. It checks linked counts, paging, drill-down,
+dates, filter preservation/removal, empty/error/retry and out-of-order responses
+using controlled promises that ignore abort. It measures 20 warm classification
+updates after 3 warmups. [Method/results](../docs/benchmarks/003-linked-interface.md).
+
+`useExplore` aborts superseded requests and independently checks an increasing
+request ID. Filter changes clear the entire old response; each new response
+commits all views together. `performance` entries named `explore-update` measure
+from the request handler through two animation frames after React commits.
+This is a paint-opportunity approximation, not physical-display measurement.
+
+## Styling
 
 Tailwind CSS 4 uses the official `@tailwindcss/vite` plugin. daisyUI 5 is configured
 in `src/styles.css` with `themes: corporate --default`; there is no custom theme
 or JavaScript Tailwind configuration. Components use daisyUI classes and semantic
-theme colors. React manages local input values, filter expansion and the state
-preview selector; none of these controls performs a search.
+theme colors. React owns search behavior. The visual redesign is deferred;
+the previously installed Mozilla font package is not imported or loaded.
 
 References: [React installation](https://daisyui.com/docs/install/react/),
 [themes](https://daisyui.com/docs/themes/),
