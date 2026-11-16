@@ -3,8 +3,10 @@
 from collections import Counter
 import hashlib
 import json
+import logging
 from pathlib import Path
 import re
+from time import perf_counter
 
 from django.db import transaction
 
@@ -17,6 +19,7 @@ CANCELED_MARKER = re.compile(
     re.IGNORECASE,
 )
 SCALAR_FIELDS = ("title", "abstract", "classification", "bibtex", "filename")
+logger = logging.getLogger("thinkstruct.ingestion")
 
 
 class IngestionError(ValueError):
@@ -72,12 +75,31 @@ def normalize_record(raw, source_file, record_index):
 
 
 def ingest_directory(directory, dry_run=False):
+    started = perf_counter()
+    logger.info("Ingestion started dry_run=%s", dry_run)
+    try:
+        result = _ingest_directory(directory, dry_run=dry_run)
+    except Exception:
+        # Payloads and raw database errors may contain sensitive source text.
+        logger.error("Ingestion failed; no changes committed by this import")
+        raise
+    logger.info(
+        "Ingestion completed dry_run=%s records=%d created=%d unchanged=%d "
+        "passages_created=%d elapsed_ms=%.1f",
+        dry_run, result["records"], result["created"], result["unchanged"],
+        result["passages_created"], (perf_counter() - started) * 1000,
+    )
+    return result
+
+
+def _ingest_directory(directory, dry_run=False):
     directory = Path(directory)
     if not directory.is_dir():
         raise IngestionError(f"Dataset directory does not exist: {directory}")
     paths = sorted(directory.rglob("*.json"))
     if not paths:
         raise IngestionError("Dataset directory contains no JSON files")
+    logger.info("Source discovery completed files=%d", len(paths))
     prepared = []
     seen = set()
     counts = Counter(files=len(paths), records=0, created=0, unchanged=0, passages_created=0,
@@ -85,6 +107,7 @@ def ingest_directory(directory, dry_run=False):
     # Validate the entire small sample before making any database changes.
     for path in paths:
         source_file = path.relative_to(directory).as_posix()
+        logger.debug("Validating source file file=%s", source_file)
         try:
             rows = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError) as exc:
@@ -103,6 +126,11 @@ def ingest_directory(directory, dry_run=False):
             counts["records"] += 1
             counts.update(skipped)
             prepared.append((metadata, passages))
+    logger.info(
+        "Input validation completed records=%d blank_entries=%d canceled_markers=%d",
+        counts["records"], counts["blank_entries"], counts["canceled_markers"],
+    )
+    logger.info("Database phase started dry_run=%s", dry_run)
     with transaction.atomic():
         existing = {
             patent.doc_number: patent
@@ -128,4 +156,5 @@ def ingest_directory(directory, dry_run=False):
                     [Passage(patent=patent, **passage) for passage in passages],
                     batch_size=1000,
                 )
+    logger.info("Database phase completed dry_run=%s", dry_run)
     return {**dict(counts), "dry_run": dry_run}

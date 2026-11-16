@@ -16,7 +16,7 @@ Work with the user to solve the patent-search take-home challenge with an explai
 ## Source and scope
 
 - Required fields listed in the brief: Title, Document Number, Abstract, Detailed Description (paragraphs), Claims, Bibtext Citation, Classification Code. Inspect actual shapes and missing data rather than assuming consistent keys.
-- The brief gives freedom for choosing search inputs and outputs. Follow explicitly accepted decisions in `docs/decisions.md`; do not treat remaining proposals as committed requirements.
+- The brief gives freedom for choosing search inputs and outputs. Follow explicitly accepted records indexed in `docs/decisions/README.md`; do not treat remaining proposals as committed requirements.
 - Here, the brief's **hybrid search** requirement includes structured filters such as classification-code constraints and title/abstract keywords; it does not automatically require vector plus keyword retrieval.
 - Part 1 should include a timed comparison with and without hybrid filters and commentary on efficiency.
 - Part 2 needs a readable Markdown architecture, major pipelines, expected costs, failure/status considerations where useful, and a small PoC.
@@ -28,8 +28,8 @@ Work with the user to solve the patent-search take-home challenge with an explai
 Keep updates concise and grounded in things that happened:
 
 - `README.md`: evaluator-facing requirements, exact commands, measured results, benchmark methodology, and delivery links.
-- `docs/decisions.md`: significant choices with status, rationale, alternatives, trade-offs, and evidence. **Do not silently promote Proposed → Accepted.**
-- `docs/journal.md`: dated milestones, obstacles, evidence, learning, delivery checklist, and next step.
+- `docs/decisions/`: one record per choice, with a short README index, rationale, alternatives, trade-offs, and evidence. **Do not silently promote Proposed → Accepted.**
+- `docs/journal/`: one entry per dated checkpoint, with a short README index/checklist; preserve obstacles, evidence, learning, and next step.
 - `docs/architecture.md`: current versus proposed pipelines; Part 2 components, failures, assumptions/costs, and designated PoC.
 - `docs/reference/`: authoritative brief. Add `docs/assets/` only when diagram files actually exist.
 
@@ -45,7 +45,7 @@ Define relevant concepts in context. Avoid separate kickoff/glossary/benchmark/c
 
 ## Current checkpoint and layout
 
-- Dataset discovery and PostgreSQL ingestion are verified; read `docs/journal.md` before continuing.
-- D-001/D-002 are explicitly accepted. Next discuss the lexical retrieval/index configuration before implementing search; do not silently choose the Part 3 enhancement.
+- Dataset discovery and PostgreSQL ingestion are verified; read `docs/journal/README.md` and the relevant checkpoint entries before continuing.
+- D-001/D-002 and the D-011 lexical retrieval configuration are explicitly accepted. Implement search incrementally with correctness tests before benchmarks; do not silently choose the Part 3 enhancement.
 - Keep Django code/configuration/dependencies/Dockerfile in `backend/`, organized by domain with thin API/CLI adapters and services. Keep Compose and `.env.example` at root.
 - `frontend/` is deferred. No Starlight, React, workers, or AWS deployment unless subsequently justified/approved.

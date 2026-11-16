@@ -3,6 +3,9 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from django.test import TestCase
+from django.core.management import call_command
+from django.core.management.base import CommandError
+from io import StringIO
 
 from .services.ingestion import IngestionError, ingest_directory, normalize_record
 from .models import Passage, Patent
@@ -124,3 +127,30 @@ class IngestionTests(TestCase):
         original.rename(self.directory / "renamed.json")
         with self.assertRaisesRegex(IngestionError, "Conflicting"):
             ingest_directory(self.directory)
+
+    def test_logs_explain_stages_without_source_text(self):
+        self.write([record()])
+        with self.assertLogs("thinkstruct.ingestion", level="INFO") as captured:
+            ingest_directory(self.directory)
+        logs = "\n".join(captured.output)
+        for stage in ("Ingestion started", "Source discovery completed",
+                      "Input validation completed", "Database phase completed",
+                      "Ingestion completed"):
+            self.assertIn(stage, logs)
+        self.assertNotIn("A wheel with a spoke.", logs)
+
+    def test_command_stdout_remains_machine_readable(self):
+        self.write([record()])
+        output = StringIO()
+        call_command("ingest_patents", str(self.directory), stdout=output)
+        self.assertEqual(json.loads(output.getvalue())["created"], 1)
+
+    def test_command_logs_failure_without_a_success_event(self):
+        self.write([record(), record()])
+        with self.assertLogs("thinkstruct.ingestion", level="INFO") as captured:
+            with self.assertRaises(CommandError):
+                call_command("ingest_patents", str(self.directory), stdout=StringIO())
+        logs = "\n".join(captured.output)
+        self.assertIn("Ingestion failed", logs)
+        self.assertNotIn("Ingestion completed", logs)
+        self.assertEqual(Patent.objects.count(), 0)

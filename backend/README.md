@@ -4,13 +4,13 @@ Run Compose commands from the repository root; see the [root README](../README.m
 
 ```text
 backend/
-  config/                 Django settings; HTTP wiring comes later
+  config/                 Django settings, HTTP wiring, infrastructure health route
   patents/                Django app for the patent domain
     models.py             Persistence, relationships, database constraints
     migrations/           Versioned database schema
     services/             Ingestion and future search use cases; no HTTP dependency
     management/commands/  Thin CLI adapters to services
-    tests.py              Ingestion tests against PostgreSQL
+    tests.py              Ingestion/logging tests against PostgreSQL
   manage.py
   scripts/profile_dataset.py  Standalone, read-only discovery; not a draft
   Dockerfile
@@ -18,7 +18,8 @@ backend/
   requirements.lock       Resolved exact runtime versions
 ```
 
-When HTTP search is implemented, add `patents/api/` for Django Ninja routes,
+The infrastructure health route/schemas live in `config/api.py`, tested in
+`config/tests.py`. When HTTP search is implemented, add `patents/api/` for Ninja routes,
 request/response schemas, and HTTP error mapping. Routes call services; services
 use models. Do not create empty API layers or global cross-domain `models/`
 and `services/` folders in advance.
