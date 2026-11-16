@@ -16,6 +16,7 @@ backend/    Django configuration, patents domain, Dockerfile, dependencies, prof
 frontend/   Deferred frontend boundary; no framework initialized
 data/       Ignored local dataset + placement instructions
 docs/       Decisions, journal, architecture, authoritative reference PDF
+tools/      Versioned Bruno collection for local HTTP smoke checks
 compose.yaml / Makefile / .env.example    Local workflow and configuration
 ```
 
@@ -61,6 +62,7 @@ Backend source is bind-mounted for editing and migration generation.
 | `make check` | Django configuration and model/migration consistency |
 | `make health` | API/database readiness; unavailable DB returns HTTP 503 |
 | `make openapi` | Export live schema to ignored `artifacts/openapi.json` |
+| `make api-test` | Run `tools/bruno/` using the installed Bruno CLI |
 | `make logs` | Follow long-lived API/database container logs |
 | `make status` / `make stop` | Inspect / stop services without deleting data |
 
@@ -109,10 +111,24 @@ Ninja generates the contract; do not maintain a separate handwritten OpenAPI spe
 
 Interactive docs: `http://localhost:8000/api/docs`. Re-export/re-import when new
 routes or schemas appear; import is not automatic synchronization or test generation.
-No extra template, Bruno CLI install, or committed generated collection is needed yet.
-Only health is implemented; search requests will follow. Bruno exercises HTTP;
-database integrity/rollback stays covered by `make test`, not direct DB access.
-Export and live endpoints were verified; manual Bruno import has not been tested.
+The imported collection is versioned in `tools/bruno/`; open that directory in
+Bruno instead of the former Documents location. Its environment
+`ThinkStruct Challenge Env` contains only the non-secret local `baseUrl`.
+For the optional CLI workflow (requires host Node.js/npm):
+
+```sh
+npm install --global @usebruno/cli@4.3.0
+make api-test
+```
+
+Verified: one health request returns HTTP 200. The imported collection currently
+has **zero assertions/tests**; this is connectivity smoke coverage, not response
+contract validation. The report goes to ignored `artifacts/bruno-report.json`
+with headers/bodies omitted. `make test` separately verifies status/body and
+the simulated 503 case, plus database integrity/rollback.
+Only health is implemented; search requests will follow. Keep secrets out of
+tracked environments. Generate future imports separately before merging to avoid
+overwriting curated requests/assertions. GUI import was not independently tested.
 [Bruno's import guide](https://docs.usebruno.com/open-api/importOAS).
 
 ## Verified results and versions

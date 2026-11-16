@@ -8,8 +8,9 @@ endif
 DOCKER ?= $(if $(wildcard /Applications/Docker.app/Contents/Resources/bin/docker),/Applications/Docker.app/Contents/Resources/bin/docker,docker)
 COMPOSE = env PATH="$(PATH)" "$(DOCKER)" compose
 RUN = $(COMPOSE) run --rm app
+BRUNO_ENV ?= ThinkStruct Challenge Env
 
-.PHONY: help build db dev migrate makemigrations check test ingest health openapi logs status stop
+.PHONY: help build db dev migrate makemigrations check test ingest health openapi api-test logs status stop
 
 help:
 	@printf '%s\n' \
@@ -21,6 +22,7 @@ help:
 	  'make ingest          Import /data/raw; add ARGS=--dry-run to validate only' \
 	  'make health          Check API/database readiness' \
 	  'make openapi         Export the live schema to artifacts/openapi.json for Bruno' \
+	  'make api-test        Run the versioned Bruno collection against the running API' \
 	  'make logs            Follow API and database container logs' \
 	  'make status          Show service state and published ports' \
 	  'make stop            Stop services without removing persistent data'
@@ -57,6 +59,10 @@ openapi:
 	@mkdir -p artifacts
 	@$(COMPOSE) exec -T app python -c "import json, urllib.request; print(json.dumps(json.load(urllib.request.urlopen('http://127.0.0.1:8000/api/openapi.json', timeout=5)), indent=2))" > artifacts/openapi.json
 	@printf '%s\n' 'OpenAPI exported to artifacts/openapi.json'
+
+api-test: health
+	@mkdir -p artifacts
+	@cd tools/bruno && bru run -r --env "$(BRUNO_ENV)" --reporter-json ../../artifacts/bruno-report.json --reporter-skip-all-headers --reporter-skip-body
 
 logs:
 	@$(COMPOSE) logs --follow --tail=100 app db

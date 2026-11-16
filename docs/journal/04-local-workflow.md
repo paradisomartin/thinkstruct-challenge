@@ -19,7 +19,14 @@
   settings omitted a Django template backend. Added that backend and a regression
   test; live docs now return 200. Make initially failed to resolve Docker despite
   PATH export; explicit bundled executable plus helper PATH fixed it.
-- **Bruno:** Documented file/URL import from generated OpenAPI; no manual contract
-  or CLI dependency. GUI import not tested. Generated requests still need assertions.
+- **Bruno:** Initially documented OpenAPI import. After user approval, installed
+  global CLI 4.3.0 and verified version/help. npm emitted deprecated transitive
+  dependency warnings; no additional install-script permissions granted.
+  User requested moving their collection from Documents into `tools/bruno/`:
+  reviewed four YAML files (only local base URL, no credentials), moved all five
+  files with matching hashes, and kept `.DS_Store` ignored.
+  CLI smoke returned 200 for one health request, **0 tests/0 assertions**. Reports
+  stay ignored under `artifacts/`; `make api-test` wraps the same collection.
+  Generated examples are not test results. GUI import not independently tested.
 - **Scope:** No users, frontend, search endpoint/index, benchmark, or AWS deployment.
   Next implement D-011 retrieval tests/service. UI waits for a useful search API.

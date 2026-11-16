@@ -1,0 +1,5 @@
+name: ThinkStruct Challenge Env
+variables:
+  - name: baseUrl
+    value: http://localhost:8000
+    description: Base URL
