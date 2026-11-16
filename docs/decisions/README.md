@@ -10,7 +10,7 @@ on 2026-11-16. Acceptance is not evidence of completed implementation.
 | D-002 | [Incomplete data and identity](002-data-policy.md) | Accepted |
 | D-003 | [Lexical retrieval](003-retrieval.md) | Accepted direction |
 | D-004 | [Flask stack](004-flask.md) | Superseded by D-008 |
-| D-005 | [Part 3 enhancement](005-enhancement.md) | Proposed |
+| D-005 | [Part 3 enhancement](005-enhancement.md) | Accepted direction; Interface at Scale, workspace initialized |
 | D-006 | [Part 2 PoC](006-poc.md) | Proposed |
 | D-007 | [Backend-first scope and AWS](007-scope.md) | Accepted |
 | D-008 | [Django and Ninja](008-django.md) | Accepted |

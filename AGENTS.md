@@ -49,4 +49,4 @@ Define relevant concepts in context. Avoid separate kickoff/glossary/benchmark/c
 - Dataset discovery and PostgreSQL ingestion are verified; read `docs/journal/README.md` and the relevant checkpoint entries before continuing.
 - D-001/D-002 and the D-011 lexical retrieval configuration are explicitly accepted. Implement search incrementally with correctness tests before benchmarks; do not silently choose the Part 3 enhancement.
 - Keep Django code/configuration/dependencies/Dockerfile in `backend/`, organized by domain with thin API/CLI adapters and services. Keep Compose and `.env.example` at root.
-- `frontend/` is deferred. No Starlight, React, workers, or AWS deployment unless subsequently justified/approved.
+- `frontend/` uses the approved Vite + React + TypeScript stack for Part 3 Interface at Scale. The workspace is initialized, not the completed enhancement. No Starlight, workers, or AWS deployment unless subsequently justified/approved.

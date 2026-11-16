@@ -2,9 +2,10 @@
 
 **Status:** Accepted · **Date:** 2026-11-16.
 
-User approved required ingestion/search/measurements before extras. Starlight,
-React, Celery/Redis, and live AWS deployment are deferred. React becomes required
-only if Interface at Scale is explicitly selected for Part 3.
+User approved required ingestion/search/measurements before extras.
+React is now approved for the selected Part 3 Interface at Scale enhancement
+(see [D-005](005-enhancement.md)). Starlight, Celery/Redis and live AWS deployment
+remain deferred.
 
 **Why / trade-off:** Protect challenge delivery time instead of speculative setup.
 Queues need demonstrated asynchronous work and add retries/duplicate execution

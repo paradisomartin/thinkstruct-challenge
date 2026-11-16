@@ -268,11 +268,13 @@ include a versioned raw JSON snapshot. New runs write only to ignored
   [approximate costs](docs/architecture/part-2-costs.md) documented;
   [on-demand container PoC](docs/architecture/part-2-poc.md) verified in an isolated
   database from the built image. No AWS deployment or at-scale capacity demonstrated.
-- Part 3: select **one** enhancement and meet its exact validation criteria.
+- Part 3: **Interface at Scale** selected; [React workspace](frontend/README.md)
+  initialized. Linked views, consistent counts, stale-response protection and
+  interaction measurements remain to be implemented.
 - Delivery: add reproducible Part 1/3 commands/results and an accessible ~2-minute
   Part 2/3 screen recording. Demo not yet recorded.
 
-Starlight, React (unless required by the selected enhancement), Celery/Redis,
+Starlight, Celery/Redis,
 and live AWS deployment are extras only if time and demonstrated need justify them.
 Process and approvals: [decisions](docs/decisions/README.md). D-011 retrieval configuration
 is implemented through HTTP with local measurements; Part 2/3 remain incomplete.

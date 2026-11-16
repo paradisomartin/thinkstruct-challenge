@@ -17,6 +17,7 @@ Approvals: [decisions](../decisions/README.md).
 | Ranking regression | [Independent score checks and corrected baseline](09-ranking-regression.md) |
 | AWS proposal | [Architecture and approximate costs](10-aws-design-costs.md) |
 | Part 2 PoC | [Isolated container ingestion](11-container-ingestion-poc.md) |
+| Frontend workspace | [Vite, React and TypeScript setup](12-react-workspace.md) |
 
 Documentation was consolidated from seven starter files in commit `e605994`,
 then explicitly split into indexed decision/checkpoint folders at user request.
@@ -33,5 +34,6 @@ were published to `origin/main`; newer local changes are not implied published.
 - [ ] Exactly one Part 3 enhancement and its validation
 - [ ] Final reproducible README and accessible ~2-minute Part 2/3 video
 
-**Next:** Choose one Part 3 enhancement explicitly, then finish reproduction and
-the Part 2/3 recording. No frontend, AWS deployment or at-scale validation yet.
+**Next:** Implement the selected Part 3 Interface at Scale enhancement from the
+initialized React workspace, then finish reproduction and the Part 2/3 recording.
+No complete search UI, AWS deployment or at-scale validation yet.
