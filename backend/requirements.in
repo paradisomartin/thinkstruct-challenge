@@ -1,0 +1,4 @@
+# Direct dependencies. Resolved transitive versions are in requirements.lock.
+Django==5.2.19
+django-ninja==1.8.0
+psycopg[binary]==3.3.9

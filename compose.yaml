@@ -1,0 +1,33 @@
+name: thinkstruct
+
+services:
+  db:
+    image: postgres:18-bookworm@sha256:ece55f7868da684e400f82f1030a050718adbdd65c23aa500c486f6e2950dc0f
+    environment:
+      POSTGRES_DB: thinkstruct
+      POSTGRES_USER: thinkstruct
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U thinkstruct -d thinkstruct"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  app:
+    build: ./backend
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+      POSTGRES_DB: thinkstruct
+      POSTGRES_USER: thinkstruct
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_HOST: db
+    volumes:
+      - ./data/raw:/data/raw:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

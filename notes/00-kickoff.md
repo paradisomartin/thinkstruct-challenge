@@ -45,14 +45,14 @@ Choose **one** from the brief: evaluation/training, two-phase search, efficiency
 9. **Define validation and measurements** — functional cases, hybrid-vs-unfiltered timings, relevant UX metrics if applicable.
 10. **Plan submission** — README, design notes, decision log, reproducible commands, demo video.
 
-## Proposed, not yet approved, scope
+## Accepted scope
 
 **User story:** A patent reviewer enters a query and optional classification/title/abstract filters, then explores ranked vehicle patents and their most relevant claims or passages.
 
 **MVP input:** free-text query plus optional classification prefix, title/abstract keyword, and title filter.  
 **MVP output:** ranked patent-level results with document number, title, classification, citation/abstract where present, and a relevant excerpt.
 
-This is a practical default to evaluate after seeing the data. The original brief intentionally leaves search inputs and outputs open.
+The user explicitly accepted D-001/D-002 after discovery; search implementation and validation remain separate checkpoints.
 
 ## Scope guardrails
 
@@ -64,8 +64,8 @@ This is a practical default to evaluate after seeing the data. The original brie
 ## Known unknowns / blockers
 
 - Dataset discovery is complete; the same data is now verified in `data/raw/`. See `02-build-journal.md`.
-- The local project location is known; the remote repository URL is needed before publishing.
-- Flask + PostgreSQL + Docker Compose is the selected backend-first stack. Detailed contract/data-policy approval, Part 3 enhancement, and Part 2 PoC selection remain open.
+- Git is initialized and the initial snapshot published to `origin/main`.
+- Django + Django Ninja + PostgreSQL + Docker Compose is the selected stack. Schema and ingestion are verified; search, Part 3 selection, and Part 2 architecture/PoC remain open.
 
 ## Next checkpoint
 

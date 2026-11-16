@@ -32,6 +32,9 @@ Add definitions when they become relevant to a decision or implementation. Keep 
 | PostgreSQL full-text search | Native lexical search using `tsvector` documents and `tsquery` queries, commonly accelerated by a GIN inverted index. |
 | `ts_rank` / `ts_rank_cd` | PostgreSQL relevance functions, not BM25; choice and configuration require validation. |
 | Flask / WSGI | Flask handles HTTP requests; a production WSGI server runs the application outside its development server. |
+| Django / Django Ninja | Selected framework and API layer: Django supplies ORM/migrations; Ninja defines typed API schemas and OpenAPI documentation. Chosen for user familiarity over Flask's lighter footprint. |
+| ORM / migration | An ORM maps application models to database operations; a migration versions schema changes. These do not replace deliberate search-index design. |
+| Stable / LTS / version pin | Stable means a production release; LTS means a project's explicitly extended support channel, where offered. Pins record exact versions for reproducibility; updates still need testing. |
 | Docker Compose | Local definition of cooperating containers and persistent volumes; not an AWS deployment mechanism. |
 | Background worker / queue | Runs asynchronous jobs outside request handling; Celery/Redis adds retry and job-state responsibilities. Deferred until justified. |
 | ECS Fargate | AWS-managed compute for ECS containers; does not automatically optimize database queries or guarantee full-system scalability. |

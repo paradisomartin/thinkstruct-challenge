@@ -119,6 +119,36 @@ The profiler prints further excerpt samples with original zero-based source indi
 - **Tooling blocker:** `docker` is not found on PATH. `psql` exists at `/opt/homebrew/bin/psql`; this does not prove that a PostgreSQL server is running. No packages installed or containers started.
 - **Next:** Review/stage the documentation snapshot and create the initial commit. Remote URL is still required for push. Enable Docker/Compose before container verification, then confirm contract/data policy and implement schema/ingestion incrementally.
 
+## Follow-up — Framework choice and setup status — 2026-11-16
+
+- **Consultation:** User reported recent Django/Django Ninja experience and explicitly preferred that stack. Discussed stable supported versions, LTS where available, and reproducible dependency/container pins; exact versions have not been selected.
+- **Decision / why:** D-008 accepts Django + Django Ninja instead of Flask; D-004 is Superseded, not silently rewritten. Flask could be more proportionate for this small API, but the user's familiarity makes Django a deliberate engineering trade-off. No measured development-speed advantage claimed.
+- **Unchanged:** PostgreSQL lexical retrieval, traceable evidence, backend-first delivery, and deferred optional infrastructure. No authentication/admin customization or queue added. Detailed contract/data-policy proposals still need confirmation.
+- **Git outcome:** Initial discovery/decisions snapshot was committed and pushed to `origin/main` as `ae5e302`, with the user's requested repository-local email. Dataset files were excluded from staging. Remote: `https://github.com/paradisomartin/thinkstruct-challenge.git`.
+- **Docker outcome:** Automated `brew install --cask docker-desktop` exited 1: sudo needed an interactive password prompt. Homebrew rolled back the application installation. No password requested through chat; user is installing manually. Successful Engine/Compose startup has not yet been verified.
+- **This change:** Documentation only; no framework dependencies installed, containers started, or cloud resources created.
+- **Next:** Verify Docker Client/Server and Compose after installation, confirm D-001/D-002, then select compatible supported versions and implement the first schema/ingestion checkpoint.
+
+## Environment checkpoint — Docker available — 2026-11-16
+
+- **Observed:** After user-managed installation, Docker Client and Server both report 29.9.3; Docker Desktop reports 4.99.0 and Compose v5.7.0.
+- **Verification:** Ran `"/Applications/Docker.app/Contents/Resources/bin/docker" version` and the same executable with `compose version`; both succeeded.
+- **Environment caveat:** The short `docker` command is still absent from this session's PATH. Use the verified absolute executable for now; no restart or global shell changes required.
+- **Boundary:** No project containers, image downloads, migrations, or search tests performed. MCP Toolkit is optional tooling, not an application dependency.
+- **Next:** Obtain explicit approval of D-001/D-002, then build only the schema/ingestion slice with compatible pinned Django/Ninja/PostgreSQL versions.
+
+## Milestone 2 — Schema and ingestion verified — 2026-11-16
+
+- **Approval:** User accepted D-001/D-002 and requested a backend/frontend monorepo. Django/Ninja replaces Flask for user familiarity, not a measured performance advantage.
+- **Built:** `backend/config/`, patent/passage models, initial migration, ingestion service, thin management command, Docker image and root Compose. API and search are not implemented. Frontend remains a README.
+- **Reproducibility:** Python 3.13.18 and PostgreSQL 18.7 base images pinned by digest; Django 5.2.19 (LTS series), Ninja 1.8.0 and psycopg 3.3.9 with exact resolved dependency versions. Verified sources: [Django releases](https://www.djangoproject.com/download/), [Ninja metadata](https://pypi.org/pypi/django-ninja/json), [psycopg metadata](https://pypi.org/pypi/psycopg/json), and official Docker image manifests.
+- **Data policy:** Preserve original JSON and passage positions. Skip blank entries and standalone canceled-claim markers in derived passages. Fail closed on malformed/conflicting input; one transaction prevents partial writes. Identical content and provenance are unchanged on rerun.
+- **Results:** Migration applied; `makemigrations --check --dry-run` reported no changes. All 12 PostgreSQL-backed tests passed (rerun confirmed). Tests cover incomplete records, provenance, marker handling, duplicate IDs, rollback, malformed input, dry run, and repeat ingestion.
+- **Actual dataset:** Dry run planned 640 patents / 31,671 passages. Real ingestion created those counts: 10,450 claims and 21,221 descriptions. Skipped 20,819 blank entries and 128 standalone canceled markers. Second ingest created 0 patents / 0 passages and reported 640 unchanged. SQL count verification matched.
+- **Learning:** 168 claim entries contain `cancel`, but only 128 match the conservative whole-entry marker rule. These are different measurements; do not equate substring counts with legally canceled claims or exclusions.
+- **Boundaries:** 119 patents without usable descriptions remain retained. Source data is mounted read-only; PostgreSQL persists in a named volume without a host port. Local `.env` is ignored and development-only. No search index, benchmark, HTTP server, or AWS deployment.
+- **Next:** Consolidate documentation as requested, then discuss the first lexical retrieval/index configuration before implementing search.
+
 ## Milestone template
 
 ### Milestone N — Title
