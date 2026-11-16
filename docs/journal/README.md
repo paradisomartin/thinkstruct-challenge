@@ -15,6 +15,7 @@ Approvals: [decisions](../decisions/README.md).
 | Search API | [HTTP contract and Bruno tests](07-search-api.md) |
 | Search measurements | [Reproducible baseline](08-search-benchmark.md) |
 | Ranking regression | [Independent score checks and corrected baseline](09-ranking-regression.md) |
+| AWS proposal | [Architecture and approximate costs](10-aws-design-costs.md) |
 
 Documentation was consolidated from seven starter files in commit `e605994`,
 then explicitly split into indexed decision/checkpoint folders at user request.

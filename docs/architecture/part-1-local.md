@@ -1,8 +1,9 @@
-# Architecture — current slice and Part 2 boundary
+# Part 1 — Implemented local architecture
 
 **Status:** Local ingestion/search and warm service measurements are verified.
-The Part 2 at-scale design, cost breakdown,
-and designated PoC are not complete. This is not a production-capacity claim.
+This document describes the implemented sample-scale system, not a production
+deployment. The [Part 2 AWS proposal](part-2-aws.md) explains what would change
+for a larger corpus.
 
 ## Implemented local pipeline
 
@@ -37,25 +38,14 @@ A PostgreSQL GIN inverted index accelerates term lookup; native `ts_rank` ranks
 eligible patents, with document-number ties. Literal title/abstract constraints
 scan candidate metadata in Python before SQL count/rank/pagination: sample-scale,
 not an indexed large-scale strategy. Evidence re-tokenizes page-local passages.
-Tests are summarized in the [README](../README.md); warm measurements are in the
-[corrected baseline report](benchmarks/002-search-ranking-fix.md).
-The [accepted contract](decisions/001-search-contract.md)
+Tests are summarized in the [project README](../../README.md); warm measurements are in the
+[corrected baseline report](../benchmarks/002-search-ranking-fix.md).
+The [accepted contract](../decisions/001-search-contract.md)
 is independent of HTTP.
 
-## At-scale candidate — still to evaluate
+## Boundary with Part 2
 
-For the brief's ~10 million patents: S3 sources, ECS Fargate API/ingestion tasks,
-RDS PostgreSQL, and optional static frontend hosting/CDN. Fargate removes host
-management, not database/index bottlenecks. Queues, retries, and status tracking
-need workload justification. Current all-in-memory/all-or-nothing ingestion
-would need bounded batches and durable progress; conflicting patent versions
-also need an explicit policy.
-
-Before completing Part 2, specify query volume, freshness, passage/index sizing,
-retention, region/provider pricing, failure/retry behavior, and observability.
-Estimate storage, database, compute, networking, and monitoring costs from those
-explicit assumptions. **No cost estimates or production capacity measured yet.**
-Select and explain one narrow PoC; do not automatically relabel current work.
-
-Keep simple diagrams inline. Add editable/exported assets under `docs/assets/`
-only when they clarify an actual design. AWS deployment remains an optional extra.
+Whole-sample ingestion, full explicit index rebuilding and Python metadata scans
+are deliberate local compromises. They are not evidence of capacity at ten
+million patents. Proposed batching, indexed filters, operational status and AWS
+components belong in the [Part 2 design](part-2-aws.md), not this implemented path.

@@ -264,8 +264,9 @@ include a versioned raw JSON snapshot. New runs write only to ignored
 ## Remaining challenge work
 
 - Part 1: search, filters, provenance and local latency comparison implemented.
-- Part 2: complete [architecture](docs/architecture.md), explicit cost assumptions,
-  and one designated PoC for ~10 million patents.
+- Part 2: [AWS design](docs/architecture/part-2-aws.md) and
+  [approximate costs](docs/architecture/part-2-costs.md) documented; refine sizing
+  assumptions and designate/verify one PoC. No at-scale capacity demonstrated.
 - Part 3: select **one** enhancement and meet its exact validation criteria.
 - Delivery: add reproducible Part 1/3 commands/results and an accessible ~2-minute
   Part 2/3 screen recording. Demo not yet recorded.

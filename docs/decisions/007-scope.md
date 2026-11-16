@@ -13,4 +13,5 @@ to manage. Initial ingestion is a command.
 AWS candidate: static hosting/CDN, ECS Fargate API/ingest tasks, RDS PostgreSQL,
 S3 sources. Fargate manages compute, not database performance. Production needs
 WSGI/ASGI serving and persistent database storage outside ephemeral API containers.
-No provisioning, costs, or capacity guarantees. [Architecture](../architecture.md).
+No AWS resources provisioned or capacity guarantees.
+[Architecture and budget assumptions](../architecture/README.md) remain proposed.
