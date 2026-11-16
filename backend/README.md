@@ -1,6 +1,6 @@
 # Backend
 
-Run Compose commands from the repository root; see the root README for setup.
+Run Compose commands from the repository root; see the [root README](../README.md) for setup.
 
 ```text
 backend/

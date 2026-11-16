@@ -2,7 +2,7 @@
 
 ## Mission
 
-Work with the user to solve the patent-search take-home challenge with an explainable engineering process. The original, authoritative brief is `reference/thinkstruct-coding-task.pdf`. Read it before proposing architecture or code. If these notes differ from the PDF, call out the difference and follow the PDF.
+Work with the user to solve the patent-search take-home challenge with an explainable engineering process. The original, authoritative brief is `docs/reference/thinkstruct-coding-task.pdf`. Read it before proposing architecture or code. If the documentation differs from the PDF, call out the difference and follow the PDF.
 
 ## Collaboration protocol
 
@@ -16,7 +16,7 @@ Work with the user to solve the patent-search take-home challenge with an explai
 ## Source and scope
 
 - Required fields listed in the brief: Title, Document Number, Abstract, Detailed Description (paragraphs), Claims, Bibtext Citation, Classification Code. Inspect actual shapes and missing data rather than assuming consistent keys.
-- The brief gives freedom for choosing search inputs and outputs. Treat current problem statement and solution in notes as **proposals**, not committed requirements.
+- The brief gives freedom for choosing search inputs and outputs. Follow explicitly accepted decisions in `docs/decisions.md`; do not treat remaining proposals as committed requirements.
 - Here, the brief's **hybrid search** requirement includes structured filters such as classification-code constraints and title/abstract keywords; it does not automatically require vector plus keyword retrieval.
 - Part 1 should include a timed comparison with and without hybrid filters and commentary on efficiency.
 - Part 2 needs a readable Markdown architecture, major pipelines, expected costs, failure/status considerations where useful, and a small PoC.
@@ -27,15 +27,13 @@ Work with the user to solve the patent-search take-home challenge with an explai
 
 Keep updates concise and grounded in things that happened:
 
-- `notes/00-kickoff.md`: source requirements, scope boundaries, clarified assumptions.
-- `notes/01-decision-log.md`: significant decisions with ID, alternatives, rationale, trade-offs, status, evidence. **Do not silently promote Proposed → Accepted.**
-- `notes/02-build-journal.md`: dated milestones, obstacles, evidence, resolutions and next step.
-- `notes/03-system-design.md`: Part 2 diagram, components, pipelines, failure handling, observed/assumed costs, PoC.
-- `notes/04-benchmark-log.md`: actual setup, workload, methodology, baseline and filtered timings, correctness.
-- `notes/05-glossary.md`: short terms as they first become relevant, not a generic encyclopedia.
-- `notes/06-delivery-checklist.md`: mark only verified completed items.
+- `README.md`: evaluator-facing requirements, exact commands, measured results, benchmark methodology, and delivery links.
+- `docs/decisions.md`: significant choices with status, rationale, alternatives, trade-offs, and evidence. **Do not silently promote Proposed → Accepted.**
+- `docs/journal.md`: dated milestones, obstacles, evidence, learning, delivery checklist, and next step.
+- `docs/architecture.md`: current versus proposed pipelines; Part 2 components, failures, assumptions/costs, and designated PoC.
+- `docs/reference/`: authoritative brief. Add `docs/assets/` only when diagram files actually exist.
 
-Prefer readable diffs and a few meaningful records over exhaustive narration. The root README is the evaluator-facing entrance, while `notes/` contains the process evidence.
+Define relevant concepts in context. Avoid separate kickoff/glossary/benchmark/checklist scaffolding, repeated run instructions, or empty templates. Prefer readable diffs and a few meaningful records over exhaustive narration.
 
 ## Dataset & reproducibility
 
@@ -45,11 +43,9 @@ Prefer readable diffs and a few meaningful records over exhaustive narration. Th
 - Favor a deterministic local workflow with tests and exact commands. Keep secrets and large generated files out of Git.
 - Use benchmarks that disclose dataset size, hardware, warm/cold state, query/filters, repetitions and aggregation method. Do not claim speedups until observed.
 
-## Immediate first task
+## Current checkpoint and layout
 
-1. Inspect the repository and original brief.
-2. Look for data in `data/raw/` (do not assume it exists).
-3. Summarize confirmed requirements and unknowns in a short response.
-4. If data exists, profile it read-only and document findings in `notes/02-build-journal.md`.
-5. Present **two at most** viable search contract/stack directions and recommend one, without implementing yet.
-6. Record proposals in `notes/01-decision-log.md`, identify the next decision for the user, then stop at the checkpoint.
+- Dataset discovery and PostgreSQL ingestion are verified; read `docs/journal.md` before continuing.
+- D-001/D-002 are explicitly accepted. Next discuss the lexical retrieval/index configuration before implementing search; do not silently choose the Part 3 enhancement.
+- Keep Django code/configuration/dependencies/Dockerfile in `backend/`, organized by domain with thin API/CLI adapters and services. Keep Compose and `.env.example` at root.
+- `frontend/` is deferred. No Starlight, React, workers, or AWS deployment unless subsequently justified/approved.
