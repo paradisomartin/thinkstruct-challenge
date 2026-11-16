@@ -1,5 +1,5 @@
 # Thinkstruct — Patent Search
-
+<img width="1866" height="810" alt="Screenshot 2026-11-16 at 8 25 03 PM" src="https://github.com/user-attachments/assets/5347a860-7979-43ab-9509-65069e0f66c6" />
 **Goal:** Help a reviewer find vehicle-related patent applications using text
 and classification/title/abstract filters, with ranked patents and traceable excerpts.
 See the [original brief](docs/reference/thinkstruct-coding-task.pdf) and
