@@ -7,6 +7,7 @@ COPY requirements.lock .
 RUN pip install --no-cache-dir -r requirements.lock
 COPY manage.py .
 COPY config config
+COPY api api
 COPY patents patents
 RUN useradd --create-home app
 USER app

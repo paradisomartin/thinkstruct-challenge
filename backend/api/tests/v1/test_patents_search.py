@@ -11,7 +11,7 @@ from patents.services.ingestion import ingest_directory
 
 
 class SearchAPITests(TestCase):
-    url = "/api/patents/search"
+    url = "/api/v1/patents/search"
 
     def setUp(self):
         with TemporaryDirectory() as directory:
@@ -94,7 +94,7 @@ class SearchAPITests(TestCase):
         self.assertEqual(response.json()["total_matches"], 0)
 
     def test_database_failure_is_sanitized(self):
-        with patch("patents.api.search_patents", side_effect=OperationalError("private details")):
+        with patch("api.v1.patents.api.search_patents", side_effect=OperationalError("private details")):
             with self.assertLogs("thinkstruct.search", level="WARNING") as captured:
                 response = self.client.get(self.url, {"query": "wheel"})
         self.assertEqual(response.status_code, 503)

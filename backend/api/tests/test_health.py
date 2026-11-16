@@ -11,7 +11,7 @@ class HealthTests(TestCase):
         self.assertEqual(response.json(), {"status": "ok", "database": "ok"})
 
     def test_database_failure_returns_503_without_details(self):
-        with patch("config.api.connection.cursor", side_effect=OperationalError("private details")):
+        with patch("api.api.connection.cursor", side_effect=OperationalError("private details")):
             with self.assertLogs("thinkstruct.health", level="WARNING") as captured:
                 response = self.client.get("/api/health")
         self.assertEqual(response.status_code, 503)

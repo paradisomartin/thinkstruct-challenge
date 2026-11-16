@@ -4,7 +4,7 @@ info:
   seq: 1
 http:
   method: GET
-  url: "{{baseUrl}}/api/patents/search?query=wheel%20spoke&limit=2"
+  url: "{{baseUrl}}/api/v1/patents/search?query=wheel%20spoke&limit=2"
   auth: inherit
 runtime:
   scripts:

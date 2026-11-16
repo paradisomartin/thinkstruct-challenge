@@ -18,6 +18,7 @@ Approvals: [decisions](../decisions/README.md).
 | AWS proposal | [Architecture and approximate costs](10-aws-design-costs.md) |
 | Part 2 PoC | [Isolated container ingestion](11-container-ingestion-poc.md) |
 | Frontend workspace | [Vite, React and TypeScript setup](12-react-workspace.md) |
+| Exploration API | [Versioned HTTP layer and consistent linked counts](13-exploration-api.md) |
 
 ## Delivery checklist
 
@@ -28,6 +29,6 @@ Approvals: [decisions](../decisions/README.md).
 - [ ] Exactly one Part 3 enhancement and its validation
 - [ ] Final reproducible README and accessible ~2-minute Part 2/3 video
 
-**Next:** Implement the selected Part 3 Interface at Scale enhancement from the
-initialized React workspace, then finish reproduction and the Part 2/3 recording.
+**Next:** Connect the React views to the verified exploration API, add stale-response
+protection and interaction measurements, then finish reproduction and the recording.
 No complete search UI, AWS deployment or at-scale validation yet.

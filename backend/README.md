@@ -4,14 +4,19 @@ Run Compose commands from the repository root; see the [root README](../README.m
 
 ```text
 backend/
-  config/                 Django settings, HTTP wiring, infrastructure health route
+  config/                 Django settings, URL mounting and WSGI
+  api/
+    api.py                Ninja composition and unversioned health route
+    v1/patents/
+      api.py              Versioned search/explore routes and HTTP error mapping
+      schemas.py          Request/response contracts
+    tests/                HTTP, serialization and generated OpenAPI tests
   patents/                Django app for the patent domain
-    models.py             Persistence, relationships, database constraints
+    models/               Patent and Passage; exports preserve patents.models imports
     migrations/           Versioned database schema
     services/             Ingestion, indexing, search and benchmark use cases
-    api.py / schemas.py   Ninja routes, validation and response schemas
     management/commands/  Thin CLI adapters to services
-    tests.py              Ingestion/logging tests against PostgreSQL
+    tests/                Ingestion, indexing, search, exploration and benchmark tests
   manage.py
   scripts/profile_dataset.py  Standalone, read-only dataset discovery
   Dockerfile
@@ -19,9 +24,16 @@ backend/
   requirements.lock       Resolved exact runtime versions
 ```
 
-The health route lives in `config/api.py`, tested in `config/tests.py`.
-Patent routes call services, which use models. Search, HTTP and benchmark tests
-live in `patents/test_search.py`, `test_api.py` and `test_benchmark.py`.
+`config/urls.py` mounts Ninja under `/api/`. Patent routes are versioned:
+`/api/v1/patents/search` and `/api/v1/patents/explore`. Health remains at
+`/api/health`; OpenAPI/docs remain at `/api/openapi.json` and `/api/docs`.
+Old unversioned patent routes are not aliases.
+
+Routes call domain services; no HTTP schemas or framework behavior belong in
+models. Run `make test` for both test packages (`patents` and `api`).
+Exploration uses `TransactionTestCase` because its service owns a read-only,
+repeatable-read transaction; it must be called outside an existing transaction.
+The model split preserves tables and migrations.
 
 Recorded runtime: Python 3.13.18, Django 5.2.19 (LTS series), Django Ninja 1.8.0,
 psycopg 3.3.9 and PostgreSQL 18.7. Direct dependencies are in `requirements.in`,

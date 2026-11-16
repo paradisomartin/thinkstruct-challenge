@@ -20,7 +20,7 @@ and original passage positions preserve provenance. Invalid input/conflicting ID
 abort the import; unchanged content/provenance is skipped. An explicit rebuild
 derives patent-level English search vectors with a GIN index. No queue/scheduler.
 
-The local development HTTP server exposes patent search, health and generated
+The local development HTTP server exposes `/api/v1/patents/search`, health and generated
 OpenAPI/docs. Health uses `SELECT 1` to test database connectivity, not dataset or
 index readiness. Compose binds the API to host loopback and uses this endpoint
 for readiness. Make wraps local tasks; English stage logs go to stderr separately
@@ -42,6 +42,11 @@ Tests are summarized in the [project README](../../README.md); warm measurements
 [corrected baseline report](../benchmarks/002-search-ranking-fix.md).
 The [accepted contract](../decisions/001-search-contract.md)
 is independent of HTTP.
+
+The Part 3 `/api/v1/patents/explore` endpoint reuses this search path and adds
+source-date filtering and full-result-set classification/date counts in one
+read-only, repeatable-read transaction. Aggregation scans compact metadata in
+Python; [contract and limits](../decisions/005-enhancement.md).
 
 ## Boundary with Part 2
 

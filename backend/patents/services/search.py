@@ -101,10 +101,11 @@ def _excerpts(page, evidence_query, effective):
     return excerpts
 
 
-def search_patents(
+def prepare_search(
     *, query=None, classification_prefix=None, title_keywords=None,
-    abstract_keywords=None, title_exact=None, limit=20, offset=0,
+    abstract_keywords=None, title_exact=None, limit=20, offset=0, allow_empty=False,
 ):
+    """Shared validation and eligibility, before ranking or pagination."""
     query = _text(query, "query")
     classification_prefix = _text(classification_prefix, "classification_prefix")
     if classification_prefix and not re.fullmatch(r"[A-Z0-9]+", classification_prefix):
@@ -116,7 +117,7 @@ def search_patents(
         raise SearchInputError("limit must be an integer between 1 and 100")
     if type(offset) is not int or offset < 0:
         raise SearchInputError("offset must be a nonnegative integer")
-    if not any((query, classification_prefix, title_exact, title_keywords, abstract_keywords)):
+    if not allow_empty and not any((query, classification_prefix, title_exact, title_keywords, abstract_keywords)):
         raise SearchInputError("Provide effective query text or at least one filter")
     effective = {
         "query": query or None, "classification_prefix": classification_prefix or None,
@@ -152,7 +153,14 @@ def search_patents(
                 continue
             eligible.append(pk)
         candidates = candidates.filter(pk__in=eligible)
-    total = candidates.count()
+    return candidates, search_query, evidence_query, effective
+
+
+def render_search(candidates, search_query, evidence_query, effective, *, total=None):
+    """Rank/page eligible patents and attach original-text evidence."""
+    if total is None:
+        total = candidates.count()
+    offset, limit = effective["offset"], effective["limit"]
     if search_query is not None:
         # Preserve stored positions/weights: pass the vector expression, not text.
         candidates = candidates.annotate(score=SearchRank(F("search_vector"), search_query))
@@ -175,3 +183,14 @@ def search_patents(
         "total_matches": total,
         "effective_request": effective,
     }
+
+
+def search_patents(
+    *, query=None, classification_prefix=None, title_keywords=None,
+    abstract_keywords=None, title_exact=None, limit=20, offset=0,
+):
+    return render_search(*prepare_search(
+        query=query, classification_prefix=classification_prefix,
+        title_keywords=title_keywords, abstract_keywords=abstract_keywords,
+        title_exact=title_exact, limit=limit, offset=offset,
+    ))

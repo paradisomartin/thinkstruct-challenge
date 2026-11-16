@@ -1,7 +1,8 @@
 # D-001 — Search contract
 
 **Status:** Accepted · **Date:** 2026-11-16.
-User explicitly confirmed the contract before ingestion. Service implemented;
+User explicitly confirmed the contract before ingestion. The current route is
+`GET /api/v1/patents/search`. Service implemented;
 HTTP adapter tested; local latency comparison recorded in the
 [corrected baseline report](../benchmarks/002-search-ranking-fix.md).
 

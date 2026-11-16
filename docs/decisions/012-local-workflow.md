@@ -21,8 +21,9 @@ Ninja OpenAPI, without users/authentication initially.
   carefully rather than overwrite curated requests. Bruno checks HTTP, not DB integrity.
 
 **Trade-off:** A loopback-only development workflow, not production serving.
-The initial health-only smoke check had no assertions; the subsequent collection
-has 8 requests and 9 passing script tests covering search and validation.
+The initial health-only smoke check had no assertions; the original search
+collection recorded 8 requests and 9 passing script tests. The
+[current v1 collection](../../tools/bruno/README.md) also checks linked-view counts.
 GUI import was not independently verified.
 [Initial workflow evidence](../journal/04-local-workflow.md) and
 [subsequent HTTP checks](../journal/07-search-api.md).

@@ -4,7 +4,7 @@ info:
   seq: 5
 http:
   method: GET
-  url: "{{baseUrl}}/api/patents/search?query=zzthinkstructnomatchzz"
+  url: "{{baseUrl}}/api/v1/patents/search?query=zzthinkstructnomatchzz"
   auth: inherit
 runtime:
   scripts:

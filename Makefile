@@ -12,15 +12,21 @@ BRUNO_ENV ?= ThinkStruct Challenge Env
 PYTHON ?= python3.13
 
 .PHONY: help venv build db dev migrate makemigrations check test ingest reindex benchmark health openapi api-test logs status stop
+.PHONY: frontend-install frontend-dev frontend-check frontend-build frontend-preview
 
 help:
 	@printf '%s\n' \
 	  'make venv            Prepare optional host Python 3.13 environment for the editor' \
 	  'make dev             Build, migrate, and start the local API with reload' \
+	  'make frontend-install Install frontend dependencies from the lockfile (requires Node.js/npm)' \
+	  'make frontend-dev    Run the frontend development server on port 5173' \
+	  'make frontend-check  Check frontend TypeScript' \
+	  'make frontend-build  Check and build the frontend for production' \
+	  'make frontend-preview Serve the built frontend locally on port 4173' \
 	  'make migrate         Apply committed database migrations' \
 	  'make makemigrations  Generate migrations in backend/ (review before applying)' \
 	  'make check           Check Django configuration and model/migration consistency' \
-	  'make test            Run PostgreSQL-backed ingestion and health tests' \
+	  'make test            Run PostgreSQL-backed domain and HTTP tests' \
 	  'make ingest          Import /data/raw; add ARGS=--dry-run to validate only' \
 	  'make reindex         Rebuild patent search vectors after ingestion' \
 	  'make benchmark       Measure warm search; write artifacts/search-benchmark.json' \
@@ -62,7 +68,7 @@ check: build db
 	@$(RUN) python manage.py makemigrations --check --dry-run
 
 test: build db
-	@$(RUN) python manage.py test patents config
+	@$(RUN) python manage.py test patents api
 
 ingest: migrate
 	@$(RUN) python manage.py ingest_patents /data/raw $(ARGS)
@@ -95,3 +101,18 @@ status:
 
 stop:
 	@$(COMPOSE) stop
+
+frontend-install:
+	@npm --prefix frontend ci
+
+frontend-dev:
+	@npm --prefix frontend run dev
+
+frontend-check:
+	@npm --prefix frontend run check
+
+frontend-build:
+	@npm --prefix frontend run build
+
+frontend-preview:
+	@npm --prefix frontend run preview

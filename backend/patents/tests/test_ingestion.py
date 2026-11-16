@@ -7,8 +7,8 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from io import StringIO
 
-from .services.ingestion import IngestionError, ingest_directory, normalize_record
-from .models import Passage, Patent
+from patents.services.ingestion import IngestionError, ingest_directory, normalize_record
+from patents.models import Passage, Patent
 
 
 def record(doc_number="001"):

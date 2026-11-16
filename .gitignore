@@ -12,6 +12,10 @@
 # Personal editor configuration
 .vscode/settings.json
 
+# Locally installed agent skills (not application dependencies)
+/.agents/skills/
+/skills-lock.json
+
 # Python and test artifacts
 .venv/
 venv/

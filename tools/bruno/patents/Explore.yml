@@ -1,0 +1,26 @@
+info:
+  name: Linked-view exploration
+  type: http
+  seq: 8
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/patents/explore?query=wheel%20spoke&limit=2"
+  auth: inherit
+runtime:
+  scripts:
+  - type: tests
+    code: |
+      test("All linked-view counts cover the same filtered result set", function () {
+        expect(res.getStatus()).to.equal(200);
+        const body = res.getBody();
+        expect(body.total_matches).to.equal(bru.getVar("searchTotal"));
+        expect(body.results).to.have.lengthOf(2);
+        const classified = body.classification_facets.reduce((sum, bucket) => {
+          expect(bucket.children.reduce((n, child) => n + child.count, 0)).to.equal(bucket.count);
+          return sum + bucket.count;
+        }, 0);
+        expect(classified + body.unclassified_count).to.equal(body.total_matches);
+        const dated = body.source_weeks.reduce((sum, bucket) => sum + bucket.count, 0);
+        expect(dated + body.unknown_source_week_count).to.equal(body.total_matches);
+        body.results.forEach(row => expect(row).to.have.property("source_week"));
+      });

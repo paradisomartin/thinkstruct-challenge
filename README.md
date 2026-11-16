@@ -7,7 +7,7 @@ See the [original brief](docs/reference/thinkstruct-coding-task.pdf) and
 
 **Delivery status:** Part 1 search and local benchmarks are implemented. Part 2
 has an AWS design, cost model and locally verified container PoC. Part 3
-**Interface at Scale** is selected, but only its React setup screen exists.
+**Interface at Scale** is selected, but only its React visual preview exists.
 The required linked views, interaction measurements and ~2-minute Part 2/3
 recording are not yet available.
 
@@ -90,13 +90,13 @@ After ingestion and rebuilding, open `http://localhost:8000/api/docs` or run
 (adjust the port if using `APP_PORT`):
 
 ```sh
-curl --get http://localhost:8000/api/patents/search \
+curl --get http://localhost:8000/api/v1/patents/search \
   --data-urlencode 'query=wheel spoke' \
   --data-urlencode 'classification_prefix=B60B' \
   --data-urlencode 'title_keywords=wheel' \
   --data-urlencode 'limit=5'
 
-curl --get http://localhost:8000/api/patents/search \
+curl --get http://localhost:8000/api/v1/patents/search \
   --data-urlencode 'title_exact=spoke'
 ```
 
@@ -115,10 +115,10 @@ Database failures return a sanitized 503. [Full contract](docs/decisions/001-sea
 
 `make test` runs PostgreSQL-backed fixtures, including ingestion rollback,
 index freshness, SQL-reference ranking, filters, provenance and HTTP errors.
-It does not require the supplied dataset. The audit reran all **55 tests**
-successfully on 2026-11-16 and reproduced the dataset fingerprint.
-The [journal](docs/journal/README.md) records ingestion and PoC verification;
-the PoC was not rerun during this editorial pass.
+It does not require the supplied dataset. The current **71-test suite** also
+covers linked-view counts, date filters and a concurrent-update snapshot test.
+The [journal](docs/journal/README.md) records ingestion, PoC and API v1 verification.
+The original PoC run predates the v1 refactor.
 
 | Check | Observed result |
 |---|---|
@@ -127,8 +127,8 @@ the PoC was not rerun during this editorial pass.
 | Skipped passage entries | 20,819 blank; 128 standalone canceled markers |
 | Repeat ingestion | 640 unchanged; 0 new patents or passages |
 | Search index | 640 non-null patent vectors; GIN migration applied |
-| Correctness | 55 ingestion/index/search/HTTP/benchmark/logging/health/OpenAPI/docs tests pass |
-| HTTP collection | 8 requests and 9 Bruno script tests pass |
+| Correctness | 71 domain/HTTP/benchmark/logging/health/OpenAPI/docs tests pass |
+| HTTP collection | 9 requests and 10 Bruno script tests pass |
 
 All 119 patents lacking usable descriptions are retained.
 
@@ -159,6 +159,7 @@ This is not a load test or large-scale capacity claim.
 [Methodology, environment, results and limitations](docs/benchmarks/002-search-ranking-fix.md)
 include a versioned raw JSON snapshot. New runs write only to ignored
 `artifacts/search-benchmark.json`; they do not overwrite that baseline.
+Those timings predate the API v1/exploration refactor and do not measure `/explore`.
 
 ## Part 2 — Scale design and PoC
 
@@ -180,19 +181,36 @@ Selected to let reviewers narrow a result set without losing context between
 views. The approved design is a results list, classification drill-down and weekly
 timeline sharing filters and counts, with stale-response protection.
 
-To run the **setup screen only**, start the API above, then:
+To run the **visual preview only** (no backend required):
 
 ```sh
-cd frontend
-npm ci
-npm run dev
+make frontend-install
+make frontend-dev
 ```
 
 Requires Node.js 22.12+ and npm. Open `http://127.0.0.1:5173`.
 [Frontend commands and proxy details](frontend/README.md).
-There are no linked search views, facet/date API, request-race tests or
-filter-to-render measurements yet; Part 1 timings do not satisfy Part 3.
-Source filenames contain dates, but legal filing-date semantics are unverified.
+The data API is implemented at `/api/v1/patents/explore`; the preview does not
+consume it yet. It returns results, filtered classification counts and **Source
+week** counts in one PostgreSQL snapshot. Source week is a source-batch date,
+not a verified legal filing date.
+
+After the Part 1 setup, try the endpoint independently:
+
+```sh
+curl --get http://localhost:8000/api/v1/patents/explore \
+  --data-urlencode 'query=wheel spoke' \
+  --data-urlencode 'source_week_from=2024-02-15' \
+  --data-urlencode 'source_week_to=2024-03-28' \
+  --data-urlencode 'limit=5'
+```
+
+Omit query/filters to browse all patents. Counts cover all filtered matches,
+not only the page. [Exploration contract](docs/decisions/005-enhancement.md).
+The live sample has 640 patents in 64 source weeks; existing `wheel spoke`
+counts remain 114 (55 with classification `B60B` and title token `wheel`).
+Linked views, frontend request-race tests and filter-to-render measurements are
+still outstanding; Part 1 timings do not satisfy Part 3.
 
 At 10 million patents, the interface would need server-side indexed filtering
 and aggregation over the same result set, bounded pagination and evidence work,

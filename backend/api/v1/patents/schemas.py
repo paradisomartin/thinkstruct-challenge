@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any, Literal
 
 from ninja import Schema
@@ -38,6 +39,39 @@ class SearchResponse(Schema):
     results: list[PatentResult]
     total_matches: int
     effective_request: SearchRequest
+
+
+class ExploreRequest(SearchRequest):
+    source_week_from: date | None = None
+    source_week_to: date | None = None
+
+
+class ExplorePatentResult(PatentResult):
+    source_week: date | None
+
+
+class ClassificationBucket(Schema):
+    prefix: str
+    count: int
+
+
+class ClassificationFacet(ClassificationBucket):
+    children: list[ClassificationBucket]
+
+
+class SourceWeekBucket(Schema):
+    source_week: date
+    count: int
+
+
+class ExploreResponse(Schema):
+    results: list[ExplorePatentResult]
+    total_matches: int
+    effective_request: ExploreRequest
+    classification_facets: list[ClassificationFacet]
+    unclassified_count: int
+    source_weeks: list[SourceWeekBucket]
+    unknown_source_week_count: int
 
 
 class SearchError(Schema):

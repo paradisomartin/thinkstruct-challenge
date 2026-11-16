@@ -47,7 +47,7 @@ docker compose -p thinkstruct-poc -f compose.yaml -f compose.poc.yaml run --rm a
 docker compose -p thinkstruct-poc -f compose.yaml -f compose.poc.yaml run --rm app python manage.py rebuild_search_index
 docker compose -p thinkstruct-poc -f compose.yaml -f compose.poc.yaml run --rm app python manage.py ingest_patents /data/raw
 docker compose -p thinkstruct-poc -f compose.yaml -f compose.poc.yaml up -d --wait app
-docker compose -p thinkstruct-poc -f compose.yaml -f compose.poc.yaml run --rm app python manage.py test patents config
+docker compose -p thinkstruct-poc -f compose.yaml -f compose.poc.yaml run --rm app python manage.py test patents api
 ```
 
 The verified run began with no PoC volume; Docker created a fresh one.
@@ -85,7 +85,7 @@ cases = [
     ({"title_exact": "SPOKE"}, 1),
 ]
 for params, expected in cases:
-    with urlopen(base + "/api/patents/search?" + urlencode(params), timeout=10) as response:
+    with urlopen(base + "/api/v1/patents/search?" + urlencode(params), timeout=10) as response:
         data = json.load(response)
     assert data["total_matches"] == expected, (params, data["total_matches"])
     for result in data["results"]:
@@ -97,6 +97,9 @@ PY
 
 These assertions check counts and presence of evidence; the automated suite
 separately tests source-position integrity, ranking and conflicting-import rollback.
+
+Commands above follow the current v1 routes and test layout. The recorded
+verification below predates that refactor; it is not a new PoC execution.
 
 ## Observed results
 

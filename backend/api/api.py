@@ -5,12 +5,12 @@ from typing import Literal
 
 from django.db import connection, DatabaseError
 from ninja import NinjaAPI, Schema
-from patents.api import router as patents_router
+from api.v1.patents.api import router as patents_router
 
 
 logger = logging.getLogger("thinkstruct.health")
-api = NinjaAPI(title="Thinkstruct API", version="0.1.0")
-api.add_router("/patents", patents_router)
+api = NinjaAPI(title="Thinkstruct API", version="1.0.0")
+api.add_router("/v1/patents", patents_router)
 
 
 class HealthResponse(Schema):

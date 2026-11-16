@@ -17,7 +17,8 @@ Only local `baseUrl` is tracked; never commit credentials. Run the full collecti
 in sequence after ingesting/indexing the supplied dataset. Filtered search and
 pagination reuse runtime variables from the first search request.
 
-Recorded result: 8 requests and 9 script tests passed. Tests live under `runtime.scripts`;
+Current v1 collection: 9 requests and 10 script tests passed, including linked-view
+count consistency for `/api/v1/patents/explore`. Tests live under `runtime.scripts`;
 Bruno's separate declarative Assertions counter remains zero. Generated response
 examples are not evidence that those responses were observed.
 
