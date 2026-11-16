@@ -1,0 +1,8 @@
+# Use with compose.yaml and an explicit, separate project name (see Part 2 PoC).
+# !override requires Docker Compose 2.24.4 or newer.
+services:
+  app:
+    ports: !override
+      - "127.0.0.1:8001:8000"
+    volumes: !override
+      - ./data/raw:/data/raw:ro

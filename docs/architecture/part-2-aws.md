@@ -132,8 +132,9 @@ we can revisit them if measurements show a limitation.
 1. Agree on query load, ingestion frequency, latency and availability targets.
 2. Refine the [approximate costs](part-2-costs.md) after measuring representative
    text sizes, index growth and query load. Recheck prices before deployment.
-3. Explicitly select and verify one small PoC. The existing local containers are
-   a candidate, not automatically a completed Part 2 PoC.
+3. Extend the [verified container-ingestion PoC](part-2-poc.md) only when needed:
+   S3 reads, bounded batches and durable progress are not implemented locally.
 
 The [Part 1 local architecture](part-1-local.md) describes what is implemented today.
-This proposal does not deploy AWS resources or complete the Part 2 cost/PoC work.
+The [cost estimate](part-2-costs.md) and [local PoC](part-2-poc.md) accompany this
+proposal. None deploys AWS resources or demonstrates capacity at scale.

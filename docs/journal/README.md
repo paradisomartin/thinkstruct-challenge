@@ -16,6 +16,7 @@ Approvals: [decisions](../decisions/README.md).
 | Search measurements | [Reproducible baseline](08-search-benchmark.md) |
 | Ranking regression | [Independent score checks and corrected baseline](09-ranking-regression.md) |
 | AWS proposal | [Architecture and approximate costs](10-aws-design-costs.md) |
+| Part 2 PoC | [Isolated container ingestion](11-container-ingestion-poc.md) |
 
 Documentation was consolidated from seven starter files in commit `e605994`,
 then explicitly split into indexed decision/checkpoint folders at user request.
@@ -28,9 +29,9 @@ were published to `origin/main`; newer local changes are not implied published.
 - [x] Dataset discovery, accepted contract/data policy, verified ingestion
 - [x] Local health/OpenAPI, stage logging, Make workflow and automated tests
 - [x] Search/evidence/filter correctness and local measured latency comparison
-- [ ] Part 2 architecture/cost assumptions and one designated PoC
+- [x] Part 2 architecture/cost assumptions and one designated PoC
 - [ ] Exactly one Part 3 enhancement and its validation
 - [ ] Final reproducible README and accessible ~2-minute Part 2/3 video
 
-**Next:** Complete Part 2 assumptions/architecture and select its PoC; choose one
-Part 3 enhancement explicitly. No frontend or at-scale validation yet.
+**Next:** Choose one Part 3 enhancement explicitly, then finish reproduction and
+the Part 2/3 recording. No frontend, AWS deployment or at-scale validation yet.
