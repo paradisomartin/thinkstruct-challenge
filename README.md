@@ -20,7 +20,6 @@ guided the desktop layout.
 | **3 — Interface at Scale** | Three linked views, removable filters, stale-response protection, tests and measured update times |
 
 The code is implemented and tested on the supplied sample.
-**The remaining submission item is the ~2-minute Part 2/3 recording; no video link is available yet.**
 The [original brief](docs/reference/thinkstruct-coding-task.pdf) is included for reference.
 
 ## Run locally
@@ -231,14 +230,13 @@ make frontend-test
 This production-bundle measurement requires host Node/npm.
 New benchmark runs write to ignored `artifacts/`, never over the recorded baselines.
 
-## Limits and remaining work
+## Limitations
 
 - English lexical matching can miss paraphrases; ranking weights are heuristics.
   No relevance evaluation or legal novelty assessment was performed.
 - Ingestion, metadata scans and full index rebuilds are sample-scale.
   PostgreSQL full-text size/position limits matter for long documents.
 - The app has no authentication and is intended for local review.
-- **Still to add:** an accessible ~2-minute recording explaining Parts 2 and 3.
 
 More detail: [architecture](docs/architecture/README.md) ·
 [decisions](docs/decisions/README.md) · [benchmarks](docs/benchmarks/README.md) ·
