@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 from django.contrib.postgres.search import SearchQuery, SearchRank
 from django.core.management import call_command
 from django.db import connection
+from django.db.models import F
 from django.test import TestCase
 
 from patents.models import Patent
@@ -28,7 +29,7 @@ class SearchIndexTests(TestCase):
         query = SearchQuery(text, config="english", search_type="plain")
         return list(
             Patent.objects.filter(search_vector=query)
-            .annotate(rank=SearchRank("search_vector", query))
+            .annotate(rank=SearchRank(F("search_vector"), query))
             .order_by("-rank", "doc_number")
             .values_list("doc_number", flat=True)
         )
@@ -230,3 +231,138 @@ class SearchServiceTests(TestCase):
         self.assertEqual(
             self.ids(search_patents(query="wheel | nonexistentlexeme")), [],
         )
+
+
+class SearchRankingRegressionTests(TestCase):
+    def ingest(self, rows):
+        with TemporaryDirectory() as directory:
+            path = Path(directory)
+            (path / "fixture.json").write_text(json.dumps(rows), encoding="utf-8")
+            ingest_directory(path)
+        rebuild_search_index()
+
+    def direct_ranks(self, query):
+        """Independent reference: no Django SearchRank expression."""
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT doc_number,
+                       ts_rank(search_vector, plainto_tsquery('english', %s)) AS score
+                FROM patents_patent
+                WHERE search_vector @@ plainto_tsquery('english', %s)
+                ORDER BY score DESC, doc_number
+            """, [query, query])
+            return cursor.fetchall()
+
+    def test_weights_affect_scores_not_just_document_order(self):
+        self.ingest([
+            {"doc_number": "001", "detailed_description": ["Wheel"]},
+            {"doc_number": "002", "claims": ["Wheel"]},
+            {"doc_number": "003", "abstract": "Wheel"},
+            {"doc_number": "004", "title": "Wheel"},
+        ])
+        rows = search_patents(query="wheel")["results"]
+        scores = {row["doc_number"]: row["score"] for row in rows}
+        self.assertGreater(scores["004"], scores["003"])
+        self.assertEqual(scores["003"], scores["002"])
+        self.assertGreater(scores["002"], scores["001"])
+        self.assertEqual([row["doc_number"] for row in rows], ["004", "002", "003", "001"])
+
+    def test_service_scores_match_direct_sql_for_single_and_multiple_terms(self):
+        self.ingest([
+            {"doc_number": "001", "title": "Wheel", "claims": ["Rotating spoke"]},
+            {"doc_number": "002", "abstract": "Wheel spoke"},
+            {"doc_number": "003", "detailed_description": ["Wheel wheel spoke"]},
+        ])
+        for query in ("wheel", "wheel spoke", "rotating"):
+            with self.subTest(query=query):
+                expected = self.direct_ranks(query)
+                actual = search_patents(query=query)["results"]
+                self.assertEqual([row["doc_number"] for row in actual], [pk for pk, _ in expected])
+                for row, (_, score) in zip(actual, expected):
+                    self.assertAlmostEqual(row["score"], score, places=7)
+
+    def test_excerpt_uses_original_term_frequency_not_serialized_vector_text(self):
+        self.ingest([{
+            "doc_number": "001",
+            "claims": ["Wheel", "  Wheel wheel wheel wheel.  "],
+        }])
+        row = search_patents(query="wheel")["results"][0]
+        self.assertEqual(row["excerpt"], {
+            "text": "  Wheel wheel wheel wheel.  ",
+            "source_field": "claims", "source_index": 1,
+        })
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT source_index
+                FROM patents_passage
+                WHERE patent_id = '001'
+                ORDER BY ts_rank(to_tsvector('english', text),
+                                 plainto_tsquery('english', 'wheel')) DESC, source_index
+                LIMIT 1
+            """)
+            self.assertEqual(row["excerpt"]["source_index"], cursor.fetchone()[0])
+
+    def test_real_ties_have_stable_pages_without_duplicates(self):
+        self.ingest([
+            {"doc_number": pk, "title": "Wheel"} for pk in ("003", "001", "002")
+        ])
+        pages = [search_patents(query="wheel", limit=1, offset=i) for i in range(4)]
+        self.assertEqual([page["total_matches"] for page in pages], [3, 3, 3, 3])
+        rows = [row for page in pages for row in page["results"]]
+        self.assertEqual([row["doc_number"] for row in rows], ["001", "002", "003"])
+        self.assertEqual(len({row["score"] for row in rows}), 1)
+        self.assertEqual(pages[-1]["results"], [])
+
+    def test_claim_only_and_description_only_patents_remain_searchable(self):
+        self.ingest([
+            {"doc_number": "001", "claims": ["A flexible spoke"]},
+            {"doc_number": "002", "detailed_description": ["A flexible spoke"]},
+        ])
+        response = search_patents(query="flexible spoke")
+        self.assertEqual(response["total_matches"], 2)
+        rows = {row["doc_number"]: row for row in response["results"]}
+        for pk, field in (("001", "claims"), ("002", "detailed_description")):
+            self.assertIsNone(rows[pk]["title"])
+            self.assertIsNone(rows[pk]["abstract"])
+            self.assertEqual(rows[pk]["excerpt"]["source_field"], field)
+            self.assertEqual(rows[pk]["excerpt"]["source_index"], 0)
+
+    def test_excerpt_ties_keep_original_index_and_claims_precede_descriptions(self):
+        self.ingest([{
+            "doc_number": "001",
+            "claims": ["", "Wheel", "Wheel"],
+            "detailed_description": ["Wheel wheel wheel wheel"],
+        }])
+        excerpt = search_patents(query="wheel")["results"][0]["excerpt"]
+        self.assertEqual(excerpt, {
+            "text": "Wheel", "source_field": "claims", "source_index": 1,
+        })
+
+    def test_search_does_not_depend_on_database_default_language(self):
+        self.ingest([{"doc_number": "001", "claims": ["Rotating wheels"]}])
+        expected = search_patents(query="rotate wheel")
+        with connection.cursor() as cursor:
+            cursor.execute("SET LOCAL default_text_search_config = 'pg_catalog.simple'")
+        self.assertEqual(search_patents(query="rotate wheel"), expected)
+
+    def test_punctuation_only_and_stop_words_reject_even_with_filter(self):
+        for query in ("!!!", "---", "the and of", "' | &"):
+            with self.subTest(query=query), self.assertRaisesRegex(SearchInputError, "no searchable"):
+                search_patents(query=query, classification_prefix="B60B")
+
+    def test_apostrophes_hyphens_repetition_and_operators_follow_plain_sql(self):
+        self.ingest([
+            {"doc_number": "001", "title": "Driver's wheel-spoke assembly"},
+            {"doc_number": "002", "claims": ["Wheel", "Spoke"]},
+            {"doc_number": "003", "abstract": "Pneumatic tire"},
+        ])
+        for query in (
+            "driver's", "wheel-spoke", "wheel wheel", "wheel & spoke",
+            "wheel | nonexistentlexeme", "wheel !spoke", "'wheel'",
+        ):
+            with self.subTest(query=query):
+                expected = self.direct_ranks(query)
+                actual = search_patents(query=query)["results"]
+                self.assertEqual([row["doc_number"] for row in actual], [pk for pk, _ in expected])
+                for row, (_, score) in zip(actual, expected):
+                    self.assertAlmostEqual(row["score"], score, places=7)

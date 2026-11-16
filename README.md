@@ -183,7 +183,7 @@ count/ranking/pagination: correct for this sample, not a large-scale metadata in
 | Skipped passage entries | 20,819 blank; 128 standalone canceled markers |
 | Repeat ingestion | 640 unchanged; 0 new patents or passages |
 | Search index | 640 non-null patent vectors; GIN migration applied |
-| Correctness | 46 ingestion/index/search/HTTP/benchmark/logging/health/OpenAPI/docs tests pass |
+| Correctness | 55 ingestion/index/search/HTTP/benchmark/logging/health/OpenAPI/docs tests pass |
 | HTTP collection | 8 requests and 9 Bruno script tests pass |
 
 All 119 patents lacking usable descriptions remain retained. Full evidence,
@@ -202,9 +202,9 @@ Reproduce after ingestion and rebuilding:
 make benchmark
 ```
 
-On 640 patents, filters lowered observed p50 in four warm-cache service comparisons;
-this is not a general speedup or large-scale capacity claim.
-[Methodology, environment, results and limitations](docs/benchmarks/001-search-baseline.md)
+On 640 patents, filters had mixed latency effects with the corrected weighted
+ranking; this is not a general speedup or large-scale capacity claim.
+[Methodology, environment, results and limitations](docs/benchmarks/002-search-ranking-fix.md)
 include a versioned raw JSON snapshot. New runs write only to ignored
 `artifacts/search-benchmark.json`; they do not overwrite that baseline.
 

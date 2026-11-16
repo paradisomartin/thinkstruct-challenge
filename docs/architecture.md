@@ -38,7 +38,7 @@ eligible patents, with document-number ties. Literal title/abstract constraints
 scan candidate metadata in Python before SQL count/rank/pagination: sample-scale,
 not an indexed large-scale strategy. Evidence re-tokenizes page-local passages.
 Tests are summarized in the [README](../README.md); warm measurements are in the
-[baseline report](benchmarks/001-search-baseline.md).
+[corrected baseline report](benchmarks/002-search-ranking-fix.md).
 The [accepted contract](decisions/001-search-contract.md)
 is independent of HTTP.
 

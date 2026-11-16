@@ -27,5 +27,5 @@ defer until baseline queries demonstrate need.
 description/pagination/no-match fixtures; index freshness and traceable excerpts.
 Inspect real queries; measure filtered/unfiltered latency separately.
 Index verification: [checkpoint](../journal/05-search-index.md). Warm sample latency:
-[baseline report](../benchmarks/001-search-baseline.md). No relevance evaluation
+[corrected baseline report](../benchmarks/002-search-ranking-fix.md). No relevance evaluation
 or at-scale performance validation yet.

@@ -4,7 +4,7 @@ import re
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import connection
-from django.db.models import Case, IntegerField, Value, When
+from django.db.models import Case, F, IntegerField, Value, When
 
 from patents.models import Passage, Patent
 
@@ -57,7 +57,8 @@ def _excerpts(page, evidence_query, effective):
             .annotate(vector=SearchVector("text", config="english"))
             .filter(vector=evidence_query)
             .annotate(
-                rank=SearchRank("vector", evidence_query),
+                # A string makes SearchRank re-tokenize vector::text.
+                rank=SearchRank(F("vector"), evidence_query),
                 preference=Case(
                     When(source_field="claims", then=Value(0)),
                     default=Value(1), output_field=IntegerField(),
@@ -153,7 +154,8 @@ def search_patents(
         candidates = candidates.filter(pk__in=eligible)
     total = candidates.count()
     if search_query is not None:
-        candidates = candidates.annotate(score=SearchRank("search_vector", search_query))
+        # Preserve stored positions/weights: pass the vector expression, not text.
+        candidates = candidates.annotate(score=SearchRank(F("search_vector"), search_query))
         candidates = candidates.order_by("-score", "doc_number")
     else:
         candidates = candidates.order_by("doc_number")

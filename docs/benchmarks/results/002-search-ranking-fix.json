@@ -1,0 +1,310 @@
+{
+  "dataset": {
+    "indexed": 640,
+    "passages": 31671,
+    "patents": 640
+  },
+  "measured_at": "2026-11-16T19:40:02.219322+00:00",
+  "method": {
+    "aggregation": "p50 median; p95 nearest-rank ceil(0.95*n)",
+    "boundary": "search_patents including validation, count, rank, paging, excerpts",
+    "cache": "warm; no OS/PostgreSQL cache reset",
+    "excludes": "startup, ingestion/rebuild, HTTP, JSON serialization, fingerprint verification",
+    "limit": 20,
+    "offset": 0,
+    "order": "sequential; alternating variant order each iteration",
+    "repetitions": 20,
+    "warmups_per_variant": 3
+  },
+  "runtime": {
+    "machine": "aarch64",
+    "postgresql": "18.7 (Debian 18.7-1.pgdg12+2)",
+    "python": "3.13.18"
+  },
+  "scenarios": [
+    {
+      "name": "wheel_classification",
+      "variants": {
+        "filtered": {
+          "p50_ms": 146.207,
+          "p95_ms": 154.844,
+          "request": {
+            "classification_prefix": "B60B",
+            "limit": 20,
+            "query": "wheel spoke"
+          },
+          "response_sha256": "76b07b7c686b9d5c7761e46a5558cb89e1a2d810a4029312f583a8049e065f9e",
+          "samples_ms": [
+            146.221,
+            145.855,
+            149.711,
+            146.204,
+            154.844,
+            155.503,
+            146.154,
+            145.452,
+            149.87,
+            146.786,
+            144.297,
+            147.356,
+            150.048,
+            145.381,
+            144.012,
+            148.386,
+            146.21,
+            144.172,
+            144.147,
+            145.084
+          ],
+          "total_matches": 98
+        },
+        "unfiltered": {
+          "p50_ms": 124.975,
+          "p95_ms": 131.204,
+          "request": {
+            "limit": 20,
+            "query": "wheel spoke"
+          },
+          "response_sha256": "b0370ec184748aaa7c45af2345615c5921f4c0fac682f1e1328637fb970fb0df",
+          "samples_ms": [
+            143.09,
+            128.316,
+            129.38,
+            125.745,
+            131.06,
+            124.855,
+            124.76,
+            124.037,
+            125.896,
+            123.887,
+            124.428,
+            124.487,
+            131.204,
+            127.772,
+            124.716,
+            124.733,
+            125.261,
+            124.858,
+            125.092,
+            124.482
+          ],
+          "total_matches": 114
+        }
+      }
+    },
+    {
+      "name": "tire_classification",
+      "variants": {
+        "filtered": {
+          "p50_ms": 132.775,
+          "p95_ms": 179.917,
+          "request": {
+            "classification_prefix": "B60C",
+            "limit": 20,
+            "query": "pneumatic tire"
+          },
+          "response_sha256": "3632ffdcf4d39374256e178fc177190ba2cf4a04a2651339e9107fbd6a42f241",
+          "samples_ms": [
+            143.38,
+            126.753,
+            141.5,
+            130.658,
+            132.401,
+            120.534,
+            124.956,
+            147.838,
+            133.15,
+            126.433,
+            124.182,
+            127.916,
+            142.566,
+            125.475,
+            211.724,
+            140.642,
+            162.872,
+            156.198,
+            179.917,
+            130.03
+          ],
+          "total_matches": 158
+        },
+        "unfiltered": {
+          "p50_ms": 136.037,
+          "p95_ms": 210.656,
+          "request": {
+            "limit": 20,
+            "query": "pneumatic tire"
+          },
+          "response_sha256": "6ee0280b65166514b534094ee7007dd6d84dc1bdc92be9220c1a0caa67394ca9",
+          "samples_ms": [
+            128.023,
+            128.787,
+            143.038,
+            232.071,
+            124.886,
+            122.904,
+            141.422,
+            125.88,
+            141.564,
+            136.206,
+            134.574,
+            126.243,
+            135.672,
+            133.129,
+            200.002,
+            178.273,
+            187.394,
+            141.088,
+            210.656,
+            135.867
+          ],
+          "total_matches": 169
+        }
+      }
+    },
+    {
+      "name": "wheel_title",
+      "variants": {
+        "filtered": {
+          "p50_ms": 144.832,
+          "p95_ms": 172.886,
+          "request": {
+            "limit": 20,
+            "query": "wheel",
+            "title_keywords": [
+              "wheel"
+            ]
+          },
+          "response_sha256": "244b85097f2a02e79415d350026d17d98f8d960276c3c5e5e22702f867b6b5f2",
+          "samples_ms": [
+            172.886,
+            146.993,
+            155.018,
+            133.839,
+            131.048,
+            151.584,
+            142.67,
+            151.782,
+            137.411,
+            221.128,
+            131.666,
+            130.326,
+            136.595,
+            129.416,
+            128.843,
+            160.196,
+            147.668,
+            162.154,
+            172.2,
+            139.8
+          ],
+          "total_matches": 163
+        },
+        "unfiltered": {
+          "p50_ms": 140.051,
+          "p95_ms": 165.303,
+          "request": {
+            "limit": 20,
+            "query": "wheel"
+          },
+          "response_sha256": "cb0b1bc27fc5892e46f330a050a6da974b99bbd3311dc3eafe95c62383a0a275",
+          "samples_ms": [
+            160.773,
+            146.439,
+            140.991,
+            139.651,
+            131.629,
+            165.303,
+            140.452,
+            153.007,
+            130.406,
+            129.203,
+            129.131,
+            127.162,
+            127.15,
+            130.618,
+            126.475,
+            132.136,
+            148.29,
+            159.449,
+            170.887,
+            160.684
+          ],
+          "total_matches": 417
+        }
+      }
+    },
+    {
+      "name": "pressure_abstract",
+      "variants": {
+        "filtered": {
+          "p50_ms": 103.944,
+          "p95_ms": 171.914,
+          "request": {
+            "abstract_keywords": [
+              "pressure"
+            ],
+            "limit": 20,
+            "query": "pressure"
+          },
+          "response_sha256": "f5e2000ab15833e4e1bbee5332719e0e3e5dce7d574251026498f9c5516db8e4",
+          "samples_ms": [
+            181.505,
+            103.312,
+            100.057,
+            100.243,
+            105.741,
+            102.189,
+            100.97,
+            100.38,
+            106.405,
+            114.358,
+            111.464,
+            171.914,
+            104.574,
+            129.27,
+            130.355,
+            99.099,
+            103.313,
+            102.478,
+            99.418,
+            108.965
+          ],
+          "total_matches": 29
+        },
+        "unfiltered": {
+          "p50_ms": 110.399,
+          "p95_ms": 133.19,
+          "request": {
+            "limit": 20,
+            "query": "pressure"
+          },
+          "response_sha256": "dcc3e54abed32b87c557720f1dab6d0a2c2ad46a66aa99f44a36ba79ddf80369",
+          "samples_ms": [
+            133.19,
+            110.36,
+            108.315,
+            108.295,
+            119.874,
+            110.437,
+            108.206,
+            107.054,
+            119.525,
+            120.71,
+            108.884,
+            106.92,
+            114.738,
+            117.244,
+            111.439,
+            107.126,
+            111.789,
+            109.188,
+            107.551,
+            158.857
+          ],
+          "total_matches": 215
+        }
+      }
+    }
+  ]
+}

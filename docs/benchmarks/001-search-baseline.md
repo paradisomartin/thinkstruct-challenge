@@ -1,5 +1,12 @@
 # 001 — Warm filtered/unfiltered service baseline
 
+**Historical / superseded:** This run used an incorrect ORM ranking expression:
+`SearchRank("search_vector", ...)` re-tokenized vector text, losing the intended
+weights/positions. The stored index and match counts were unaffected, but ranking,
+excerpt ordering and timings do not describe the intended algorithm.
+Retained unchanged raw measurements for traceability; use
+[report 002](002-search-ranking-fix.md) for the corrected implementation.
+
 ## Question and reproduction
 
 How does adding a classification or literal metadata constraint affect the

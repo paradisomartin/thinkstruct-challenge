@@ -14,6 +14,7 @@ Approvals: [decisions](../decisions/README.md).
 | Search service | [Filters, ranking and evidence](06-search-service.md) |
 | Search API | [HTTP contract and Bruno tests](07-search-api.md) |
 | Search measurements | [Reproducible baseline](08-search-benchmark.md) |
+| Ranking regression | [Independent score checks and corrected baseline](09-ranking-regression.md) |
 
 Documentation was consolidated from seven starter files in commit `e605994`,
 then explicitly split into indexed decision/checkpoint folders at user request.
