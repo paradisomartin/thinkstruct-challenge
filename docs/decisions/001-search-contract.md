@@ -1,7 +1,8 @@
 # D-001 — Search contract
 
 **Status:** Accepted · **Date:** 2026-11-16.
-User explicitly confirmed the contract before ingestion. Search is not implemented.
+User explicitly confirmed the contract before ingestion. Service implemented;
+HTTP adapter and latency comparison remain pending.
 
 **Why:** Patent-level results with traceable passages keep the workflow explainable.
 Claim-only results are an alternative, but entries are not reliably complete or

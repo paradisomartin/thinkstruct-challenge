@@ -1,6 +1,6 @@
 # D-011 — First lexical search configuration
 
-**Status:** Accepted; index/rebuild implemented, search service pending · **Date:** 2026-11-16.
+**Status:** Accepted; index/rebuild/search service implemented, HTTP pending · **Date:** 2026-11-16.
 User explicitly accepted this baseline before requesting developer workflow tools.
 
 - One persisted `tsvector` per patent plus GIN index. Use nullable-safe title/

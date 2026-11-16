@@ -7,7 +7,7 @@ See the [original brief](docs/reference/thinkstruct-coding-task.pdf) and
 
 **Status:** Dataset discovery, schema, and repeatable PostgreSQL ingestion verified.
 Local health/OpenAPI endpoints and explicit full-text index rebuilding are available.
-The search service/endpoint and required enhancement are not implemented yet.
+The search service is tested; its HTTP endpoint and required enhancement are pending.
 
 ## Structure and approach
 
@@ -150,7 +150,7 @@ overwriting curated requests/assertions. GUI import was not independently tested
 | Skipped passage entries | 20,819 blank; 128 standalone canceled markers |
 | Repeat ingestion | 640 unchanged; 0 new patents or passages |
 | Search index | 640 non-null patent vectors; GIN migration applied |
-| Correctness | 25 ingestion/indexing/health/OpenAPI/docs tests pass; migrations consistent |
+| Correctness | 35 ingestion/index/search/logging/health/OpenAPI/docs tests pass |
 
 All 119 patents lacking usable descriptions remain retained. Full evidence,
 dataset fingerprint, caveats, and learning: [journal](docs/journal/README.md).
@@ -177,5 +177,5 @@ filters and verify correctness; filter selectivity alone does not prove a speedu
 Starlight, React (unless required by the selected enhancement), Celery/Redis,
 and live AWS deployment are extras only if time and demonstrated need justify them.
 Process and approvals: [decisions](docs/decisions/README.md). D-011 retrieval configuration
-is partially implemented (index/rebuild/tests); next implement the service and
-filter/evidence tests before exposing HTTP search.
+is implemented at service level (index, filters, ranking, provenance, tests);
+next expose HTTP search and measure filtered/unfiltered latency.
