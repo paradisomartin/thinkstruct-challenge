@@ -6,8 +6,8 @@ See the [original brief](docs/reference/thinkstruct-coding-task.pdf) and
 [accepted contract](docs/decisions/001-search-contract.md).
 
 **Status:** Dataset discovery, schema, and repeatable PostgreSQL ingestion verified.
-Local health/OpenAPI endpoints are available. Search and the required enhancement
-are not implemented yet.
+Local health/OpenAPI endpoints and explicit full-text index rebuilding are available.
+The search service/endpoint and required enhancement are not implemented yet.
 
 ## Structure and approach
 
@@ -49,6 +49,7 @@ make test
 make ingest ARGS=--dry-run
 make ingest
 make ingest
+make reindex
 ```
 
 `make dev` builds, starts PostgreSQL, applies committed migrations, and starts
@@ -60,6 +61,7 @@ Backend source is bind-mounted for editing and migration generation.
 | `make migrate` | Build/start DB and apply committed migrations |
 | `make makemigrations` | Generate migrations in `backend/`; review before applying |
 | `make check` | Django configuration and model/migration consistency |
+| `make reindex` | Rebuild all patent search vectors after ingestion |
 | `make health` | API/database readiness; unavailable DB returns HTTP 503 |
 | `make openapi` | Export live schema to ignored `artifacts/openapi.json` |
 | `make api-test` | Run `tools/bruno/` using the installed Bruno CLI |
@@ -71,6 +73,14 @@ ingest must create nothing. Invalid input/duplicate IDs/conflicting existing con
 or provenance abort the whole import; identical records are unchanged.
 Keep partial searchable patents, omit blank/canceled-only derived passages, and
 retain raw JSON and original positions. [Data policy](docs/decisions/002-data-policy.md).
+
+`make reindex` derives one English `tsvector` per patent from title (A),
+abstract/claims (B), and usable descriptions (D); a GIN index supports term lookup.
+Rebuild explicitly after ingestion: new patents have a null vector until then.
+Repeating unchanged ingestion preserves existing vectors. Direct edits to titles,
+abstracts or passages also require a rebuild; there is no automatic freshness
+detector or concurrent ingestion/rebuild protocol. The rebuild is one atomic update
+for this sample, not a streaming large-scale indexer.
 
 Reproduce read-only discovery separately (Python 3.9+; no dependencies):
 
@@ -139,7 +149,8 @@ overwriting curated requests/assertions. GUI import was not independently tested
 | First ingestion | 640 patents; 10,450 claim + 21,221 description passages |
 | Skipped passage entries | 20,819 blank; 128 standalone canceled markers |
 | Repeat ingestion | 640 unchanged; 0 new patents or passages |
-| Correctness | 19 ingestion/logging/health/OpenAPI/docs tests pass; migrations consistent |
+| Search index | 640 non-null patent vectors; GIN migration applied |
+| Correctness | 25 ingestion/indexing/health/OpenAPI/docs tests pass; migrations consistent |
 
 All 119 patents lacking usable descriptions remain retained. Full evidence,
 dataset fingerprint, caveats, and learning: [journal](docs/journal/README.md).
@@ -166,4 +177,5 @@ filters and verify correctness; filter selectivity alone does not prove a speedu
 Starlight, React (unless required by the selected enhancement), Celery/Redis,
 and live AWS deployment are extras only if time and demonstrated need justify them.
 Process and approvals: [decisions](docs/decisions/README.md). D-011 retrieval configuration
-is accepted; next implement its index/service/tests before exposing HTTP search.
+is partially implemented (index/rebuild/tests); next implement the service and
+filter/evidence tests before exposing HTTP search.

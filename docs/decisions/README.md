@@ -16,7 +16,7 @@ on 2026-11-16. Acceptance is not evidence of completed implementation.
 | D-008 | [Django and Ninja](008-django.md) | Accepted |
 | D-009 | [Monorepo boundaries](009-monorepo.md) | Accepted |
 | D-010 | [Documentation/configuration](010-documentation.md) | Accepted; organization updated explicitly |
-| D-011 | [Search configuration](011-search-configuration.md) | Accepted; not implemented |
+| D-011 | [Search configuration](011-search-configuration.md) | Accepted; index implemented, service pending |
 | D-012 | [Logs, health, Make, Bruno](012-local-workflow.md) | Accepted |
 
 Statuses: Proposed · Accepted · Rejected · Superseded. Record explicit approval

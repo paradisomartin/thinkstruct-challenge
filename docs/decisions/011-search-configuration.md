@@ -1,6 +1,6 @@
 # D-011 — First lexical search configuration
 
-**Status:** Accepted; not implemented · **Date:** 2026-11-16.
+**Status:** Accepted; index/rebuild implemented, search service pending · **Date:** 2026-11-16.
 User explicitly accepted this baseline before requesting developer workflow tools.
 
 - One persisted `tsvector` per patent plus GIN index. Use nullable-safe title/
@@ -25,5 +25,6 @@ defer until baseline queries demonstrate need.
 
 **Verification:** Deterministic ranking/cross-field/filter/title/stop-word/missing-
 description/pagination/no-match fixtures; index freshness and traceable excerpts.
-Inspect real queries; measure filtered/unfiltered latency separately. No search
-results or benchmarks claimed.
+Inspect real queries; measure filtered/unfiltered latency separately.
+Index verification: [checkpoint](../journal/05-search-index.md). No relevance
+evaluation or search benchmark yet.

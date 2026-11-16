@@ -1,3 +1,5 @@
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 
 
@@ -12,9 +14,11 @@ class Patent(models.Model):
     record_index = models.PositiveIntegerField()
     content_sha256 = models.CharField(max_length=64)
     raw_record = models.JSONField()
+    search_vector = SearchVectorField(null=True, editable=False)
 
     class Meta:
         ordering = ["doc_number"]
+        indexes = [GinIndex(fields=["search_vector"], name="patent_search_vector_gin")]
 
 
 class Passage(models.Model):
