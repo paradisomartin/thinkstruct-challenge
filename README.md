@@ -59,6 +59,7 @@ Backend source is bind-mounted for editing and migration generation.
 
 | Command | Purpose |
 |---|---|
+| `make venv` | Optional local Python 3.13 environment for VS Code; no Docker required |
 | `make migrate` | Build/start DB and apply committed migrations |
 | `make makemigrations` | Generate migrations in `backend/`; review before applying |
 | `make check` | Django configuration and model/migration consistency |
@@ -95,6 +96,58 @@ The API is bound only to host loopback. Its healthcheck tests `SELECT 1`, not
 whether the dataset or search index is ready. Database state persists in a named volume.
 Do not use `down -v` unless you intend to delete that database.
 No production HTTP server or cloud deployment is configured.
+
+### Optional local editor environment
+
+Docker already contains the runtime dependencies. A local environment is only
+needed if VS Code/Pylance analyzes the repository from the host instead of attaching
+to the container. It does not replace Docker or require a local PostgreSQL server.
+
+With host Python 3.13 installed, run from the repository root:
+
+```sh
+make venv
+# If Python is elsewhere: make venv PYTHON=/path/to/python3.13
+```
+
+On macOS with Homebrew, install Python if missing with `brew install python@3.13`.
+The Make target creates `.venv` only when absent, validates Python 3.13, and installs
+`backend/requirements.lock`. Rerun it after dependency changes. It never replaces
+an existing environment; if its Python version is wrong, move it aside explicitly
+before retrying. No shell activation is required.
+
+In the **local** VS Code window, run **Python: Select Interpreter** and choose
+`${workspaceFolder}/.venv/bin/python` (or use **Enter interpreter path**).
+For backend-local imports, merge these entries into `.vscode/settings.json`,
+preserving other preferences:
+
+```json
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.extraPaths": ["${workspaceFolder}/backend"]
+}
+```
+
+Selecting the interpreter explicitly also updates an existing workspace selection;
+`defaultInterpreterPath` alone may not change it. Reload the window if diagnostics
+persist. Keep Python/Pylance enabled; Dev Containers is optional and can be disabled
+when using this workflow. `.venv/` is ignored; keep editor settings local.
+Continue using `make dev`, `make check` and `make test` for execution in Docker:
+the host environment does not inherit Compose's database hostname or credentials.
+
+Optional fish shell convenience (personal configuration, outside this repository):
+
+```fish
+alias --save py python3
+source .venv/bin/activate.fish
+py --version
+# Leave the environment with: deactivate
+```
+
+`py` follows the `python3` found on PATH: Python 3.13 while this environment is
+active, your existing global Python otherwise. Installing Homebrew's versioned
+Python does not necessarily change the global `python3`. `make venv` deliberately
+uses `python3.13` (or `PYTHON=...`) rather than shell aliases.
 
 ### Logs
 

@@ -2,12 +2,15 @@
 /data/*
 !/data/README.md
 
-# Secrets and local configuration
+# Secrets and environment configuration
 .env
 .env.*
 !.env.example
 *.pem
 *.key
+
+# Personal editor configuration
+.vscode/settings.json
 
 # Python and test artifacts
 .venv/
@@ -24,7 +27,11 @@ htmlcov/
 *.sqlite3
 /pgdata/
 /artifacts/
+
+# Frontend dependencies and build output
 node_modules/
 dist/
 .astro/
+
+# macOS metadata
 .DS_Store

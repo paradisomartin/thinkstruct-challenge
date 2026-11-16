@@ -9,11 +9,13 @@ DOCKER ?= $(if $(wildcard /Applications/Docker.app/Contents/Resources/bin/docker
 COMPOSE = env PATH="$(PATH)" "$(DOCKER)" compose
 RUN = $(COMPOSE) run --rm app
 BRUNO_ENV ?= ThinkStruct Challenge Env
+PYTHON ?= python3.13
 
-.PHONY: help build db dev migrate makemigrations check test ingest reindex benchmark health openapi api-test logs status stop
+.PHONY: help venv build db dev migrate makemigrations check test ingest reindex benchmark health openapi api-test logs status stop
 
 help:
 	@printf '%s\n' \
+	  'make venv            Prepare optional host Python 3.13 environment for the editor' \
 	  'make dev             Build, migrate, and start the local API with reload' \
 	  'make migrate         Apply committed database migrations' \
 	  'make makemigrations  Generate migrations in backend/ (review before applying)' \
@@ -28,6 +30,17 @@ help:
 	  'make logs            Follow API and database container logs' \
 	  'make status          Show service state and published ports' \
 	  'make stop            Stop services without removing persistent data'
+
+venv:
+	@if [ ! -e .venv ]; then \
+	  command -v "$(PYTHON)" >/dev/null 2>&1 || { printf '%s\n' 'Python 3.13 not found. Install it or set PYTHON=/path/to/python3.13.' >&2; exit 1; }; \
+	  "$(PYTHON)" -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 13) else 'Python 3.13 is required for the editor environment.')" && \
+	  "$(PYTHON)" -m venv .venv; \
+	fi
+	@test -x .venv/bin/python || { printf '%s\n' 'Existing .venv is not usable; move it aside explicitly before retrying.' >&2; exit 1; }
+	@.venv/bin/python -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 13) and sys.prefix != sys.base_prefix else 'Expected a Python 3.13 virtual environment; existing .venv was not replaced.')"
+	@.venv/bin/python -m pip install -r backend/requirements.lock
+	@printf '%s\n' 'Select .venv/bin/python in VS Code. Application/test commands still run in Docker.'
 
 build:
 	@$(COMPOSE) build app
