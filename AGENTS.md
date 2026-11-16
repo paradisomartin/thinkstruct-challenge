@@ -31,6 +31,7 @@ Keep updates concise and grounded in things that happened:
 - `docs/decisions/`: one record per choice, with a short README index, rationale, alternatives, trade-offs, and evidence. **Do not silently promote Proposed → Accepted.**
 - `docs/journal/`: one entry per dated checkpoint, with a short README index/checklist; preserve obstacles, evidence, learning, and next step.
 - `docs/architecture.md`: current versus proposed pipelines; Part 2 components, failures, assumptions/costs, and designated PoC.
+- `docs/benchmarks/`: indexed experiment reports and selected raw JSON snapshots; fresh runs write to ignored `artifacts/`, never overwrite a committed baseline.
 - `docs/reference/`: authoritative brief. Add `docs/assets/` only when diagram files actually exist.
 
 Define relevant concepts in context. Avoid separate kickoff/glossary/benchmark/checklist scaffolding, repeated run instructions, or empty templates. Prefer readable diffs and a few meaningful records over exhaustive narration.

@@ -63,6 +63,7 @@ Backend source is bind-mounted for editing and migration generation.
 | `make makemigrations` | Generate migrations in `backend/`; review before applying |
 | `make check` | Django configuration and model/migration consistency |
 | `make reindex` | Rebuild all patent search vectors after ingestion |
+| `make benchmark` | Warm service comparison; writes ignored `artifacts/search-benchmark.json` |
 | `make health` | API/database readiness; unavailable DB returns HTTP 503 |
 | `make openapi` | Export live schema to ignored `artifacts/openapi.json` |
 | `make api-test` | Run `tools/bruno/` using the installed Bruno CLI |
@@ -182,7 +183,7 @@ count/ranking/pagination: correct for this sample, not a large-scale metadata in
 | Skipped passage entries | 20,819 blank; 128 standalone canceled markers |
 | Repeat ingestion | 640 unchanged; 0 new patents or passages |
 | Search index | 640 non-null patent vectors; GIN migration applied |
-| Correctness | 42 ingestion/index/search/HTTP/logging/health/OpenAPI/docs tests pass |
+| Correctness | 46 ingestion/index/search/HTTP/benchmark/logging/health/OpenAPI/docs tests pass |
 | HTTP collection | 8 requests and 9 Bruno script tests pass |
 
 All 119 patents lacking usable descriptions remain retained. Full evidence,
@@ -193,14 +194,23 @@ psycopg **3.3.9**, PostgreSQL **18.7**. Direct/resolved dependencies are in
 `backend/requirements.in` / `backend/requirements.lock`; base image digests are
 pinned in the Dockerfile and Compose. Pins still need deliberate security updates.
 
-**Search benchmarks: not run.** Before reporting timings, disclose dataset
-fingerprint/size, hardware, query/filters, warm/cold state, timing boundaries,
-repetitions, and aggregation (e.g. p50/p95). Compare the same query with/without
-filters and verify correctness; filter selectivity alone does not prove a speedup.
+### Filtered/unfiltered service benchmark
+
+Reproduce after ingestion and rebuilding:
+
+```sh
+make benchmark
+```
+
+On 640 patents, filters lowered observed p50 in four warm-cache service comparisons;
+this is not a general speedup or large-scale capacity claim.
+[Methodology, environment, results and limitations](docs/benchmarks/001-search-baseline.md)
+include a versioned raw JSON snapshot. New runs write only to ignored
+`artifacts/search-benchmark.json`; they do not overwrite that baseline.
 
 ## Remaining challenge work
 
-- Part 1: measure filtered/unfiltered search latency and explain efficiency limits.
+- Part 1: search, filters, provenance and local latency comparison implemented.
 - Part 2: complete [architecture](docs/architecture.md), explicit cost assumptions,
   and one designated PoC for ~10 million patents.
 - Part 3: select **one** enhancement and meet its exact validation criteria.
@@ -210,5 +220,4 @@ filters and verify correctness; filter selectivity alone does not prove a speedu
 Starlight, React (unless required by the selected enhancement), Celery/Redis,
 and live AWS deployment are extras only if time and demonstrated need justify them.
 Process and approvals: [decisions](docs/decisions/README.md). D-011 retrieval configuration
-is implemented through HTTP (index, filters, ranking, provenance, tests);
-next measure filtered/unfiltered latency.
+is implemented through HTTP with local measurements; Part 2/3 remain incomplete.

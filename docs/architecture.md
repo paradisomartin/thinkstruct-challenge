@@ -1,6 +1,7 @@
 # Architecture — current slice and Part 2 boundary
 
-**Status:** Local ingestion is verified. The Part 2 at-scale design, cost breakdown,
+**Status:** Local ingestion/search and warm service measurements are verified.
+The Part 2 at-scale design, cost breakdown,
 and designated PoC are not complete. This is not a production-capacity claim.
 
 ## Implemented local pipeline
@@ -15,16 +16,16 @@ JSON files (read-only mount)
 Django models/migrations define persistence. Services coordinate use cases;
 commands adapt CLI inputs/errors. Raw JSON, source filename, record position,
 and original passage positions preserve provenance. Invalid input/conflicting IDs
-abort the import; unchanged content/provenance is skipped. There is no queue,
-scheduler, or search index yet.
+abort the import; unchanged content/provenance is skipped. An explicit rebuild
+derives patent-level English search vectors with a GIN index. No queue/scheduler.
 
-The local development HTTP server exposes only infrastructure health and generated
+The local development HTTP server exposes patent search, health and generated
 OpenAPI/docs. Health uses `SELECT 1` to test database connectivity, not dataset or
 index readiness. Compose binds the API to host loopback and uses this endpoint
 for readiness. Make wraps local tasks; English stage logs go to stderr separately
-from ingestion JSON stdout. Bruno consumes OpenAPI for manual HTTP testing.
+from command JSON stdout. Bruno has versioned HTTP requests and script tests.
 
-## Next search slice (accepted direction, not implemented)
+## Implemented search path
 
 ```text
 query + structured filters → Ninja schemas/routes → search service
@@ -32,9 +33,13 @@ query + structured filters → Ninja schemas/routes → search service
     → patent results with traceable excerpts
 ```
 
-A PostgreSQL GIN inverted index can accelerate term lookup; `ts_rank`/`ts_rank_cd`
-are relevance functions, not BM25. Configuration, evidence selection, query plans,
-and timings still require testing. The [accepted contract](decisions/001-search-contract.md)
+A PostgreSQL GIN inverted index accelerates term lookup; native `ts_rank` ranks
+eligible patents, with document-number ties. Literal title/abstract constraints
+scan candidate metadata in Python before SQL count/rank/pagination: sample-scale,
+not an indexed large-scale strategy. Evidence re-tokenizes page-local passages.
+Tests are summarized in the [README](../README.md); warm measurements are in the
+[baseline report](benchmarks/001-search-baseline.md).
+The [accepted contract](decisions/001-search-contract.md)
 is independent of HTTP.
 
 ## At-scale candidate — still to evaluate

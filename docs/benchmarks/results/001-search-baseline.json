@@ -1,0 +1,106 @@
+{
+  "dataset": {"indexed": 640, "passages": 31671, "patents": 640},
+  "measured_at": "2026-11-16T19:26:31.707267+00:00",
+  "method": {
+    "aggregation": "p50 median; p95 nearest-rank ceil(0.95*n)",
+    "boundary": "search_patents including validation, count, rank, paging, excerpts",
+    "cache": "warm; no OS/PostgreSQL cache reset",
+    "excludes": "startup, ingestion/rebuild, HTTP, JSON serialization, fingerprint verification",
+    "limit": 20,
+    "offset": 0,
+    "order": "sequential; alternating variant order each iteration",
+    "repetitions": 20,
+    "warmups_per_variant": 3
+  },
+  "runtime": {
+    "machine": "aarch64",
+    "postgresql": "18.7 (Debian 18.7-1.pgdg12+2)",
+    "python": "3.13.18"
+  },
+  "scenarios": [
+    {
+      "name": "wheel_classification",
+      "variants": {
+        "filtered": {
+          "p50_ms": 269.126,
+          "p95_ms": 274.016,
+          "request": {"classification_prefix": "B60B", "limit": 20, "query": "wheel spoke"},
+          "response_sha256": "0f57418805f66e407b1fb5ef237b56027ab96db5af0dfc41da840ba196989440",
+          "samples_ms": [271.056, 274.016, 268.447, 275.544, 268.608, 268.681, 268.053, 268.749, 268.094, 269.894, 268.412, 267.759, 268.693, 269.948, 269.502, 271.899, 271.271, 267.588, 271.432, 270.593],
+          "total_matches": 98
+        },
+        "unfiltered": {
+          "p50_ms": 304.747,
+          "p95_ms": 314.504,
+          "request": {"limit": 20, "query": "wheel spoke"},
+          "response_sha256": "227aedcb10a7e52f85f5eb8a87a1d3a82eec059248225a061fa44dba57a8a65e",
+          "samples_ms": [303.87, 305.534, 303.63, 307.897, 315.7, 304.256, 302.744, 308.605, 304.087, 304.096, 306.275, 304.448, 303.713, 314.504, 308.106, 311.831, 303.803, 305.046, 302.882, 311.874],
+          "total_matches": 114
+        }
+      }
+    },
+    {
+      "name": "tire_classification",
+      "variants": {
+        "filtered": {
+          "p50_ms": 441.178,
+          "p95_ms": 448.198,
+          "request": {"classification_prefix": "B60C", "limit": 20, "query": "pneumatic tire"},
+          "response_sha256": "232b37f627df0aeead05adc8be1bafb43232a7bc7e9541e24434d20701f3c0cd",
+          "samples_ms": [443.589, 437.43, 441.929, 450.11, 443.133, 437.176, 439.075, 438.266, 438.263, 439.725, 438.664, 441.339, 437.894, 443.656, 439.082, 441.402, 446.994, 441.017, 448.198, 445.182],
+          "total_matches": 158
+        },
+        "unfiltered": {
+          "p50_ms": 470.902,
+          "p95_ms": 479.314,
+          "request": {"limit": 20, "query": "pneumatic tire"},
+          "response_sha256": "e389a48512c6ace288b938a37732a64d497c743232da2ea4e94c42ce15e92de6",
+          "samples_ms": [468.091, 469.929, 466.919, 468.498, 470.018, 477.56, 470.349, 475.579, 470.88, 470.925, 466.029, 473.335, 469.901, 472.775, 471.4, 479.314, 475.036, 472.106, 470.63, 494.671],
+          "total_matches": 169
+        }
+      }
+    },
+    {
+      "name": "wheel_title",
+      "variants": {
+        "filtered": {
+          "p50_ms": 466.568,
+          "p95_ms": 473.172,
+          "request": {"limit": 20, "query": "wheel", "title_keywords": ["wheel"]},
+          "response_sha256": "0f2705f08bab45de793d4f80175df4dc5f81d87ca98b1fecb22f51788a82316d",
+          "samples_ms": [465.808, 472.139, 463.571, 462.375, 467.328, 468.598, 465.031, 465.556, 471.567, 468.664, 473.172, 464.242, 465.684, 469.282, 461.421, 473.649, 472.547, 465.292, 464.232, 468.773],
+          "total_matches": 163
+        },
+        "unfiltered": {
+          "p50_ms": 958.553,
+          "p95_ms": 967.107,
+          "request": {"limit": 20, "query": "wheel"},
+          "response_sha256": "5997a53d5b9ec8dec03f88ee59e0aa56153c4680239778b11df4963716d13c81",
+          "samples_ms": [960.055, 954.627, 967.107, 953.629, 953.172, 965.153, 951.413, 953.985, 963.656, 963.351, 953.258, 958.812, 966.808, 960.527, 964.098, 958.294, 956.588, 1033.867, 957.309, 956.906],
+          "total_matches": 417
+        }
+      }
+    },
+    {
+      "name": "pressure_abstract",
+      "variants": {
+        "filtered": {
+          "p50_ms": 155.682,
+          "p95_ms": 161.181,
+          "request": {"abstract_keywords": ["pressure"], "limit": 20, "query": "pressure"},
+          "response_sha256": "f9f8d596e9c3d8bd60a3175aa3f9905ae50f420051c2de81d6297ca56f5b98f3",
+          "samples_ms": [154.534, 162.597, 156.2, 156.358, 161.181, 155.658, 152.693, 155.706, 155.227, 155.404, 156.997, 155.444, 153.797, 155.9, 154.882, 155.401, 159.746, 155.284, 158.497, 156.988],
+          "total_matches": 29
+        },
+        "unfiltered": {
+          "p50_ms": 613.005,
+          "p95_ms": 631.971,
+          "request": {"limit": 20, "query": "pressure"},
+          "response_sha256": "b61fbda599e268974d145a38fef6ed0684143e7a0400b1fb05d03759451a88cf",
+          "samples_ms": [611.932, 636.447, 625.71, 614.258, 625.568, 613.065, 612.13, 612.34, 612.89, 631.971, 608.937, 606.534, 606.716, 610.737, 623.402, 612.599, 616.612, 616.05, 613.525, 612.944],
+          "total_matches": 215
+        }
+      }
+    }
+  ]
+}

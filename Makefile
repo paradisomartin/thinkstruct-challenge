@@ -10,7 +10,7 @@ COMPOSE = env PATH="$(PATH)" "$(DOCKER)" compose
 RUN = $(COMPOSE) run --rm app
 BRUNO_ENV ?= ThinkStruct Challenge Env
 
-.PHONY: help build db dev migrate makemigrations check test ingest reindex health openapi api-test logs status stop
+.PHONY: help build db dev migrate makemigrations check test ingest reindex benchmark health openapi api-test logs status stop
 
 help:
 	@printf '%s\n' \
@@ -21,6 +21,7 @@ help:
 	  'make test            Run PostgreSQL-backed ingestion and health tests' \
 	  'make ingest          Import /data/raw; add ARGS=--dry-run to validate only' \
 	  'make reindex         Rebuild patent search vectors after ingestion' \
+	  'make benchmark       Measure warm search; write artifacts/search-benchmark.json' \
 	  'make health          Check API/database readiness' \
 	  'make openapi         Export the live schema to artifacts/openapi.json for Bruno' \
 	  'make api-test        Run the versioned Bruno collection against the running API' \
@@ -55,6 +56,11 @@ ingest: migrate
 
 reindex: migrate
 	@$(RUN) python manage.py rebuild_search_index
+
+benchmark: migrate
+	@mkdir -p artifacts
+	@$(RUN) python manage.py benchmark_search $(ARGS) > artifacts/search-benchmark.json
+	@printf '%s\n' 'Search benchmark written to artifacts/search-benchmark.json'
 
 health:
 	@$(COMPOSE) exec -T app python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5).read().decode())"

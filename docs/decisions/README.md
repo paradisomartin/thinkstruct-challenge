@@ -6,7 +6,7 @@ on 2026-11-16. Acceptance is not evidence of completed implementation.
 
 | ID | Decision | Status |
 |---|---|---|
-| D-001 | [Search contract](001-search-contract.md) | Accepted; search pending |
+| D-001 | [Search contract](001-search-contract.md) | Accepted; search API tested |
 | D-002 | [Incomplete data and identity](002-data-policy.md) | Accepted |
 | D-003 | [Lexical retrieval](003-retrieval.md) | Accepted direction |
 | D-004 | [Flask stack](004-flask.md) | Superseded by D-008 |
@@ -16,7 +16,7 @@ on 2026-11-16. Acceptance is not evidence of completed implementation.
 | D-008 | [Django and Ninja](008-django.md) | Accepted |
 | D-009 | [Monorepo boundaries](009-monorepo.md) | Accepted |
 | D-010 | [Documentation/configuration](010-documentation.md) | Accepted; organization updated explicitly |
-| D-011 | [Search configuration](011-search-configuration.md) | Accepted; search API implemented, benchmarks pending |
+| D-011 | [Search configuration](011-search-configuration.md) | Accepted; API tested and sample benchmark recorded |
 | D-012 | [Logs, health, Make, Bruno](012-local-workflow.md) | Accepted |
 
 Statuses: Proposed · Accepted · Rejected · Superseded. Record explicit approval

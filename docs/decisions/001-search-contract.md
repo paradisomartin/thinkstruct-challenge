@@ -2,7 +2,8 @@
 
 **Status:** Accepted · **Date:** 2026-11-16.
 User explicitly confirmed the contract before ingestion. Service implemented;
-HTTP adapter implemented; latency comparison remains pending.
+HTTP adapter tested; local latency comparison recorded in the
+[baseline report](../benchmarks/001-search-baseline.md).
 
 **Why:** Patent-level results with traceable passages keep the workflow explainable.
 Claim-only results are an alternative, but entries are not reliably complete or
