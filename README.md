@@ -1,96 +1,98 @@
 # Thinkstruct — Patent Search
-<img width="1866" height="810" alt="Screenshot 2026-11-16 at 8 25 03 PM" src="https://github.com/user-attachments/assets/5347a860-7979-43ab-9509-65069e0f66c6" />
-**Goal:** Help a reviewer find vehicle-related patent applications using text
-and classification/title/abstract filters, with ranked patents and traceable excerpts.
-See the [original brief](docs/reference/thinkstruct-coding-task.pdf) and
-[accepted contract](docs/decisions/001-search-contract.md).
 
-**Delivery status:** Part 1 search and local benchmarks are implemented. Part 2
-has an AWS design, cost model and locally verified container PoC. Part 3
-**Interface at Scale** has three linked React views, stale-response protection,
-frontend integration/E2E checks and recorded sample-scale update measurements.
-The remaining submission requirement is an accessible ~2-minute Part 2/3 recording;
-no recording link has been published yet.
+A small workspace for exploring vehicle patents: search their text, narrow by
+classification or keywords, and inspect the original passages behind a match.
+The results list, classification breakdown and weekly timeline stay in sync as
+you change filters.
 
-## Structure and approach
+<img width="1866" height="810" alt="Thinkstruct patent search workspace with linked results, classifications and source weeks" src="https://github.com/user-attachments/assets/5347a860-7979-43ab-9509-65069e0f66c6" />
 
-Django provides persistence and migrations; Django Ninja exposes typed HTTP routes
-and OpenAPI. PostgreSQL provides English lexical retrieval and structured filters,
-without embedding infrastructure. One weighted search vector per patent and native
-`ts_rank` keep counts and ranking at patent level; original passage positions make excerpts
-traceable. [Local architecture](docs/architecture/part-1-local.md).
-`backend/` owns Django, `frontend/` owns React, and root Compose orchestrates the
-API/database plus an optional development frontend. Optional rationale and evidence
-are indexed under `docs/`.
+Built with **Django, Django Ninja, PostgreSQL and React**, with Tailwind CSS and
+daisyUI. The [Figma design](https://www.figma.com/design/nhVo8ZpPfyB6G3dEk62ijB/Thinkstruct-Challenge---Martin-Paradiso?node-id=3-5)
+guided the desktop layout.
 
-## Run Part 1
+## What's included
 
-Prerequisites: Make, Docker Engine running, Docker Compose v2 with `--wait` support,
-and the separately supplied JSON files extracted into `data/raw/`.
-The isolated Part 2 PoC requires Compose 2.24.4+. Data is not published in Git; see
-[data placement](data/README.md).
+| Challenge part | Delivered |
+|---|---|
+| **1 — Search** | Text search, structured filters, ranked results, traceable evidence and a filtered/unfiltered benchmark |
+| **2 — Scale** | AWS architecture, approximate costs and a locally verified container ingestion PoC |
+| **3 — Interface at Scale** | Three linked views, removable filters, stale-response protection, tests and measured update times |
 
-From the repository root, create `.env` **only if it does not already exist**:
+The code is implemented and tested on the supplied sample.
+**The remaining submission item is the ~2-minute Part 2/3 recording; no video link is available yet.**
+The [original brief](docs/reference/thinkstruct-coding-task.pdf) is included for reference.
+
+## Run locally
+
+### Recommended: everything in Docker
+
+You need Make, Docker and Docker Compose v2 with `--wait` support. Place the
+separately supplied JSON files in `data/raw/`; they are not included in Git.
+See [data placement](data/README.md).
+
+From the repository root, create `.env` **only if you don't already have one**:
 
 ```sh
 cp .env.example .env
 ```
 
-Replace both secret placeholders. Defaults: `LOG_LEVEL=INFO`, `APP_PORT=8000`.
-Docker must be on PATH, or supply `DOCKER=/path/to/docker`; Make also supports
-Docker Desktop's bundled executable on macOS.
+Replace `DJANGO_SECRET_KEY` and `POSTGRES_PASSWORD`, then run:
 
 ```sh
-make dev
-make check
-make test
+make dev-all
 make ingest ARGS=--dry-run
 make ingest
-make ingest                  # Repeating identical input should create nothing
 make reindex
 ```
 
-`make dev` builds, migrates and starts Django's **development** server at
-`http://localhost:8000`. Database state persists in a named volume.
+Open **http://127.0.0.1:5173**.
+The API docs are at **http://localhost:8000/api/docs**.
 
-| Command | Purpose |
-|---|---|
-| `make check` | Django configuration and model/migration consistency |
-| `make benchmark` | Warm service comparison; writes ignored `artifacts/search-benchmark.json` |
-| `make health` | API/database readiness; unavailable DB returns HTTP 503 |
-| `make openapi` | Export live schema to ignored `artifacts/openapi.json` |
-| `make api-test` | Optional live HTTP checks; [Bruno setup](tools/bruno/README.md) |
-| `make logs` | Follow long-lived API/database container logs |
-| `make status` / `make stop` | Inspect / stop services without deleting data |
-| `make dev-all` | Start API/database and the optional Docker frontend |
+`make dev-all` builds the images, applies migrations and starts the three
+services. Ingestion and indexing are explicit steps; they are not repeated on
+every startup. The first frontend startup downloads Node and installs the
+locked dependencies.
 
-Dry-run counts mean *would create*. Invalid input, duplicate IDs or conflicting
-content/provenance abort the import; identical records are unchanged.
-Partial searchable patents are retained; blank/canceled-only passages are omitted
-from derived data, while raw JSON and positions are preserved.
-[Data policy](docs/decisions/002-data-policy.md).
+- Already using port 5173? Use `make dev-all FRONTEND_PORT=5174`.
+- To stop everything: `make stop`. To inspect services: `make status`.
+- Database data persists across restarts. **Do not run `docker compose down -v`**
+  unless you intend to delete it.
 
-`make reindex` derives one English `tsvector` per patent from title (A),
-abstract/claims (B), and usable descriptions (D); a GIN index supports term lookup.
-Rebuild explicitly after ingestion: new patents have a null vector until then.
-Direct text edits also require rebuilding; there is no automatic freshness
-detector or concurrent ingestion/rebuild protocol.
+These are local development servers, bound to loopback, not a production deployment.
+Docker must be on PATH, or set `DOCKER=/path/to/docker`; Make also recognizes
+Docker Desktop's bundled executable on macOS.
 
-Reproduce read-only discovery separately (Python 3.9+; no dependencies):
+### Alternative: run React on the host
+
+With Node.js 22.12+ and npm installed:
 
 ```sh
-python3 backend/scripts/profile_dataset.py data/raw
+make dev
+# Run ingestion and indexing above if not already done.
+make frontend-install
+make frontend-dev
 ```
 
-PostgreSQL has no published host port; the API binds to loopback without
-authentication. Health checks database connectivity, not index readiness.
-Source data is read-only. Do not use `down -v`: it deletes persisted database data.
-Optional editor setup and logging details: [backend guide](backend/README.md).
+`make dev` starts only Django and PostgreSQL. Stop the Docker frontend first
+with `make frontend-docker-stop` if it occupies the same port.
+Host Vite is stopped with Ctrl+C, not `make stop`.
+[Frontend setup, proxy and test details](frontend/README.md).
 
-### Search examples
+## Try the linked views
 
-After ingestion and rebuilding, open `http://localhost:8000/api/docs` or run
-(adjust the port if using `APP_PORT`):
+1. Start with **Clear all**: the supplied sample has **640 patents**.
+2. Search `wheel spoke`: **114 matches**.
+3. Select `B60`, then `B60B`: **98 matches**.
+4. In **Advanced filters**, add `wheel` to **Title keywords**: **55 matches**.
+5. Select a source week. All three views update together.
+6. Remove filters in any order, or enter a new query: the other filters stay applied.
+
+Counts cover **all filtered matches**, not just the current page.
+“Source week” means the date in the weekly JSON filename, not a verified legal
+filing date. Date ranges are inclusive.
+
+### Use the API directly
 
 ```sh
 curl --get http://localhost:8000/api/v1/patents/search \
@@ -98,182 +100,146 @@ curl --get http://localhost:8000/api/v1/patents/search \
   --data-urlencode 'classification_prefix=B60B' \
   --data-urlencode 'title_keywords=wheel' \
   --data-urlencode 'limit=5'
-
-curl --get http://localhost:8000/api/v1/patents/search \
-  --data-urlencode 'title_exact=spoke'
 ```
 
-All constraints combine with AND. Query lexemes also combine with AND, using
-English stemming and no raw query operators. Title/abstract
-keywords are literal tokens (repeat parameters for multiple terms). Exact titles
-ignore case and collapsed whitespace. Stop-word-only queries return 422.
-Pagination defaults to limit 20 / offset 0, with limit 1–100.
+For exact-title lookup, use `title_exact=spoke`. For browse and linked-view
+counts, use `/api/v1/patents/explore`; omit query/filters to browse everything.
 
-Responses contain pre-pagination counts, effective filters, scores and unmodified
-excerpts with source positions. An excerpt may explain only part of a cross-field
-query. Filter-only scores and classification-only excerpts are null.
-Database failures return a sanitized 503. [Full contract](docs/decisions/001-search-contract.md).
+All constraints combine with AND. Text search uses English stemming;
+title/abstract keywords are literal tokens. Repeat API keyword parameters for
+multiple terms. Exact titles ignore case and collapsed whitespace.
+Stop-word-only queries return 422. Pagination defaults to 20 results, with a
+maximum of 100 per page. [Full search contract](docs/decisions/001-search-contract.md)
+and [exploration contract](docs/decisions/005-enhancement.md).
 
-## Tests and measured results
+## How it works
 
-`make test` runs PostgreSQL-backed fixtures, including ingestion rollback,
-index freshness, SQL-reference ranking, filters, provenance and HTTP errors.
-It does not require the supplied dataset. The current **71-test suite** also
-covers linked-view counts, date filters and a concurrent-update snapshot test.
-The [journal](docs/journal/README.md) records ingestion, PoC and API v1 verification.
-The original PoC run predates the v1 refactor.
+### Part 1: search and evidence
 
-| Check | Observed result |
-|---|---|
-| Discovery | 64 JSON files, 640 unique patent IDs, 0 duplicates |
-| First ingestion | 640 patents; 10,450 claim + 21,221 description passages |
-| Skipped passage entries | 20,819 blank; 128 standalone canceled markers |
-| Repeat ingestion | 640 unchanged; 0 new patents or passages |
-| Search index | 640 non-null patent vectors; GIN migration applied |
-| Correctness | 71 domain/HTTP/benchmark/logging/health/OpenAPI/docs tests pass |
-| HTTP collection | 9 requests and 10 Bruno script tests pass |
-| Frontend integration | 4 Vitest/jsdom tests pass with synthetic HTTP responses |
-| Live frontend | Browser workflow/race checks pass on 640 patents; [timings](docs/benchmarks/003-linked-interface.md) |
+PostgreSQL handles both text search and structured filters. Each patent has a
+persisted English `tsvector` and a GIN index; native `ts_rank` ranks matches.
+Title text has weight A, abstract/claims B, and descriptions D. This keeps the
+implementation small and explainable without adding embedding infrastructure.
 
-All 119 patents lacking usable descriptions are retained.
+Results include original-text excerpts and source positions. An excerpt may
+explain only part of a query that matches across fields; it is not a generated
+summary or a legal relevance assessment.
 
-Recorded runtime and dependency pins: [backend guide](backend/README.md).
+The sample contains **64 files, 640 patents and 31,671 usable passages**.
+All **119 patents without usable descriptions** are retained. Blank or canceled
+passages are excluded from search, while original records and positions remain
+available for traceability. Reimporting identical files leaves the data unchanged;
+conflicting content or provenance aborts the import instead of overwriting it.
+[Data policy](docs/decisions/002-data-policy.md).
 
-### Filtered/unfiltered service benchmark
+Run `make reindex` after importing or changing text. Index freshness is not
+automatic. [Local architecture](docs/architecture/part-1-local.md) and
+[backend guide](backend/README.md).
 
-Reproduce after ingestion and rebuilding:
+### Part 2: a path to larger scale
+
+The [AWS proposal](docs/architecture/part-2-aws.md) separates Fargate API tasks
+from on-demand ingestion, using RDS PostgreSQL and immutable sources in S3.
+It covers retries, import status, networking and backups.
+
+The [cost model](docs/architecture/part-2-costs.md) estimates about **$1,120/month**
+for Single-AZ or **$1,966/month** with an RDS standby, before 20% contingency.
+These are assumptions, not measured spending or validated capacity.
+
+The [local PoC](docs/architecture/part-2-poc.md) demonstrates containerized
+ingestion, indexing, idempotent reimport and API checks on the sample.
+Its isolated reproduction requires Compose 2.24.4+.
+**No AWS resources were deployed, and 10-million-patent capacity is not claimed.**
+
+### Part 3: keeping the views consistent
+
+**Interface at Scale** was chosen because narrowing a result set is more useful
+when you can see its distribution and evidence alongside the list.
+
+`/api/v1/patents/explore` computes results and counts in one read-only PostgreSQL
+`REPEATABLE READ` snapshot. React applies that response as a whole.
+When filters change, old views are cleared until the new response arrives.
+Requests are canceled, and a separate request ID prevents older successes
+or errors from replacing the latest state even if cancellation is ignored.
+
+At 10 million patents, Python metadata scans would need to become indexed
+database filtering and aggregation. Evidence work, facet payloads and pagination
+would need bounds, with query-plan and concurrency measurements. The coherent
+response and latest-request guard would still matter. These scale changes are
+proposals, not implemented optimizations.
+
+## Tests
 
 ```sh
-make benchmark
+make check                    # Django checks and migration consistency
+make test                     # 71 backend tests; no supplied dataset needed
+make frontend-docker-test     # 4 Vitest tests; Docker frontend must be running
+make api-test                 # Bruno: 9 requests / 10 tests
+make frontend-test URL=http://127.0.0.1:5173
 ```
 
-On 640 patents / 31,671 passages, using 3 warmups and 20 measured calls per
+The last command runs browser checks against the live app and requires the
+640-patent sample, Python 3 and `agent-browser`.
+It covers linked counts, filters, pagination, empty/error/retry states and
+out-of-order responses. Vitest uses synthetic HTTP responses; it does not replace
+these live checks. See [browser setup](frontend/README.md#verification-and-measurements)
+and [Bruno setup](tools/bruno/README.md).
+
+Without a running frontend container, use `make frontend-unit-test` for Vitest
+on the host.
+
+## Measurements
+
+### Search with and without filters
+
+On 640 patents / 31,671 passages, with 3 warmups and 20 measured calls per
 variant, alternating order, limit 20 and warm caches:
 
-| Query | Added filter | Matches without → with | p50 ms without → with |
+| Query | Added filter | Matches without → with | Median ms without → with |
 |---|---|---:|---:|
 | `wheel spoke` | Classification `B60B` | 114 → 98 | 124.975 → 146.207 |
 | `pneumatic tire` | Classification `B60C` | 169 → 158 | 136.037 → 132.775 |
 | `wheel` | Title token `wheel` | 417 → 163 | 140.051 → 144.832 |
 | `pressure` | Abstract token `pressure` | 215 → 29 | 110.399 → 103.944 |
 
-These are sequential service-call timings on an Apple M1 host (8 CPUs, 8 GiB;
-Docker VM about 3.82 GiB), excluding HTTP and serialization. Filters had mixed
-latency effects; fewer candidates do not guarantee faster excerpt selection.
-This is not a load test or large-scale capacity claim.
-[Methodology, environment, results and limitations](docs/benchmarks/002-search-ranking-fix.md)
-include a versioned raw JSON snapshot. New runs write only to ignored
-`artifacts/search-benchmark.json`; they do not overwrite that baseline.
-Those timings predate the API v1/exploration refactor and do not measure `/explore`.
+Filters had mixed effects: fewer candidates do not guarantee faster excerpt
+selection. These are sequential service timings, excluding HTTP, on an Apple M1
+(8 CPUs, 8 GiB; Docker VM about 3.82 GiB).
+They predate the exploration refactor.
+[Method and raw results](docs/benchmarks/002-search-ranking-fix.md).
+Reproduce with `make benchmark`.
 
-## Part 2 — Scale design and PoC
+### Filter-to-render time
 
-The [AWS design](docs/architecture/part-2-aws.md) separates Fargate API tasks
-from on-demand ingestion, with RDS PostgreSQL and immutable sources in S3.
-It covers bounded batches, durable import status, retries, networking and backups
-as proposed work. The target is 10 million patents, not demonstrated capacity.
+Selecting `B60B` from browse (640 → 298 matches, 20 rendered results) took
+**50.0 ms median / 51.3 ms p95** over 20 warm updates after 3 warmups.
+This used a local production bundle, headless Chrome 155 and an Apple M1 / 8 GB Mac.
+Timing runs from the filter handler through the second animation frame after
+the views commit, including API time and a paint opportunity.
+It is not a remote-network or at-scale benchmark, and predates the Figma styling.
+[Method and raw results](docs/benchmarks/003-linked-interface.md).
 
-The [cost model](docs/architecture/part-2-costs.md) budgets about $1,120/month
-Single-AZ or $1,966 with one RDS standby, before 20% contingency. These are
-assumption-based estimates, not expenses or validated instance sizing.
-The [container PoC](docs/architecture/part-2-poc.md) includes exact isolated
-Compose commands and recorded results: 640 patents indexed, idempotent reimport
-and HTTP checks from image code. No AWS deployment is required by this PoC.
-
-## Part 3 — Interface at Scale
-
-Selected to let reviewers narrow a result set without losing context between
-views. The approved design is a results list, classification drill-down and weekly
-timeline sharing filters and counts, with stale-response protection.
-
-After the Part 1 setup (API running, sample ingested and index rebuilt):
-
-```sh
-make frontend-install
-make frontend-dev
-```
-
-Requires Node.js 22.12+ and npm. Open `http://127.0.0.1:5173`.
-[Frontend commands and proxy details](frontend/README.md).
-
-Alternatively, run the frontend in Docker without installing Node on the host:
-
-```sh
-make dev-all
-```
-
-Open the same URL. Stop local Vite first to free port 5173, or use
-`make dev-all FRONTEND_PORT=5174` and open `http://127.0.0.1:5174`.
-First startup downloads the Node image and installs locked npm dependencies.
-The frontend uses a separate dependency volume; PostgreSQL data is unchanged.
-`make frontend-docker-test` runs Vitest in the running container.
-`make frontend-docker-stop` stops only that frontend; `make stop` stops all
-Compose services. Host-run Vite still requires Ctrl+C in its terminal.
-This runs Vite for local development, not production hosting.
-
-The frontend consumes `/api/v1/patents/explore`. Results, classification
-drill-down and a selectable weekly distribution share filters and one response.
-Click a classification, week or result-card metadata button to filter all views.
-Active filters are individually removable; new queries keep the other filters.
-Advanced filters include inclusive date bounds and title/abstract constraints.
-All API counts share one PostgreSQL snapshot. Source week is a source-batch date,
-not a verified legal filing date.
-
-After the Part 1 setup, try the endpoint independently:
-
-```sh
-curl --get http://localhost:8000/api/v1/patents/explore \
-  --data-urlencode 'query=wheel spoke' \
-  --data-urlencode 'source_week_from=2024-02-15' \
-  --data-urlencode 'source_week_to=2024-03-28' \
-  --data-urlencode 'limit=5'
-```
-
-Omit query/filters to browse all patents. Counts cover all filtered matches,
-not only the page. [Exploration contract](docs/decisions/005-enhancement.md).
-The live sample has 640 patents in 64 source weeks; existing `wheel spoke`
-counts remain 114 (55 with classification `B60B` and title token `wheel`).
-The client clears old views during loading, cancels superseded requests and
-rejects older successes/errors by request ID, even if cancellation is ignored.
-Browser regressions cover these races, linked counts, filters, paging and
-loading/empty/error/retry behavior.
-`make frontend-unit-test` also runs four fast Vitest/jsdom integration tests
-with synthetic API responses, without starting any servers.
-
-Reproduce browser checks and timings:
+To reproduce, keep the API running:
 
 ```sh
 make frontend-build
 make frontend-preview
-# Another terminal, API and preview running:
+# In another terminal:
 make frontend-test
 ```
 
-Requires Python 3 and local `agent-browser`; [setup](frontend/README.md).
-On **640 patents / 64 source weeks**, selecting `B60B` from browse
-(298 matches, 20 rendered results) took **50.0 ms median / 51.3 ms p95**:
-20 warm updates after 3 warmups, local production bundle, headless Chrome 155,
-Apple M1 / 8 GB Mac. Timing starts in the filter handler and ends at the second
-animation frame after linked-view commit, including API and a paint opportunity.
-This is not a remote-network or at-scale benchmark.
-[Method and raw measurements](docs/benchmarks/003-linked-interface.md).
+This production-bundle measurement requires host Node/npm.
+New benchmark runs write to ignored `artifacts/`, never over the recorded baselines.
 
-At 10 million patents, the interface would need server-side indexed filtering
-and aggregation over the same result set, bounded pagination and evidence work,
-and a request-versioning contract to keep all views consistent. These are design
-requirements, not implemented optimizations.
+## Limits and remaining work
 
-## Limitations and submission checklist
+- English lexical matching can miss paraphrases; ranking weights are heuristics.
+  No relevance evaluation or legal novelty assessment was performed.
+- Ingestion, metadata scans and full index rebuilds are sample-scale.
+  PostgreSQL full-text size/position limits matter for long documents.
+- The app has no authentication and is intended for local review.
+- **Still to add:** an accessible ~2-minute recording explaining Parts 2 and 3.
 
-- Lexical English matching can miss paraphrases. Weights are heuristics; no
-  relevance evaluation or legal novelty assessment was performed.
-- Python metadata scans, whole-sample ingestion and full index rebuilds are sample-scale.
-  Vectors require explicit rebuilding; PostgreSQL full-text size/position limits
-  matter for long documents.
-- Code and tests have been pushed to the GitHub repository. To complete submission,
-  record an accessible ~2-minute walkthrough of Parts 2 and 3, add its link here,
-  and publish any final documentation changes.
-
-Optional evidence: [architecture](docs/architecture/README.md),
-[benchmarks](docs/benchmarks/README.md), [decisions](docs/decisions/README.md),
+More detail: [architecture](docs/architecture/README.md) ·
+[decisions](docs/decisions/README.md) · [benchmarks](docs/benchmarks/README.md) ·
 [engineering journal](docs/journal/README.md).
