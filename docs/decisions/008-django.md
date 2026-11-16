@@ -12,4 +12,5 @@ productivity/performance improvement claimed; no users/custom admin scope added.
 
 Use compatible supported stable releases, LTS where offered, and exact
 dependency/image pins with deliberate security updates. Verified versions:
-[root README](../../README.md). Ingestion and infrastructure HTTP exist; search pending.
+[root README](../../README.md). Ingestion, indexing and the search API are
+implemented and covered by PostgreSQL-backed tests.

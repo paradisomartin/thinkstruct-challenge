@@ -1,7 +1,7 @@
 # Journal index
 
-One entry per checkpoint; do not append unrelated milestones to old entries.
-Commands/results overview: [root README](../../README.md).
+Historical checkpoint notes: pending work and test counts describe each
+checkpoint, not the current state. Commands/results overview: [root README](../../README.md).
 Approvals: [decisions](../decisions/README.md).
 
 | Checkpoint (2026-11-16) | Evidence |
@@ -18,12 +18,6 @@ Approvals: [decisions](../decisions/README.md).
 | AWS proposal | [Architecture and approximate costs](10-aws-design-costs.md) |
 | Part 2 PoC | [Isolated container ingestion](11-container-ingestion-poc.md) |
 | Frontend workspace | [Vite, React and TypeScript setup](12-react-workspace.md) |
-
-Documentation was consolidated from seven starter files in commit `e605994`,
-then explicitly split into indexed decision/checkpoint folders at user request.
-The authoritative PDF and dataset fingerprint remain unchanged.
-Initial snapshot `ae5e302`, ingestion `f8ce343`, and consolidation `e605994`
-were published to `origin/main`; newer local changes are not implied published.
 
 ## Delivery checklist
 

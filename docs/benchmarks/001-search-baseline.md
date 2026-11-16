@@ -7,7 +7,7 @@ excerpt ordering and timings do not describe the intended algorithm.
 Retained unchanged raw measurements for traceability; use
 [report 002](002-search-ranking-fix.md) for the corrected implementation.
 
-## Question and reproduction
+## Question and historical command
 
 How does adding a classification or literal metadata constraint affect the
 complete search service's latency on the supplied sample?
@@ -22,7 +22,9 @@ make benchmark
 # Optional: make benchmark ARGS='--repetitions 30 --warmups 5 --limit 20'
 ```
 
-The last command writes `artifacts/search-benchmark.json`, not the versioned
+Running these commands now measures the corrected implementation, not this
+historical defect. The last command writes `artifacts/search-benchmark.json`,
+not the versioned
 [baseline snapshot](results/001-search-baseline.json). The snapshot retains all
 report values, including individual samples, requests and response hashes.
 No patent text or credentials are included.
@@ -63,30 +65,15 @@ test or a claim about 10 million patents. Different filters select different pag
 and excerpt workloads; changes cannot be attributed solely to index lookup.
 The JSON snapshot is authoritative for this execution.
 
-An additional `EXPLAIN (ANALYZE, BUFFERS)` on candidate-ID lookup for `wheel spoke`
-used a bitmap scan on `patent_search_vector_gin` with and without `B60B`; the latter
-removed 16 of 114 candidates by a classification filter. Those single-plan timings
-are not comparable to the full-service benchmark and are not used as evidence of
-a speedup.
-
-Persisted vectors avoid rebuilding document text per candidate lookup; count,
-ranking and page-local excerpt tokenization still cost work. At scale, persist
-indexed literal tokens/normalized titles instead of scanning metadata in Python,
-evaluate prefix indexes and real plans, bound evidence extraction, and reconsider
-passage indexes/pagination using measured workloads. None of these proposed
-optimizations has been benchmarked here. This baseline does not satisfy Part 3.
-
-Filters lowered observed p50 in this run. This does not establish a general
-speedup: filters change selected pages and excerpt workloads, not only candidate
-counts. This is neither a load test, a cold-cache test, nor evidence of capacity
-at 10 million patents. No relevance evaluation was performed.
+No relevance evaluation was performed. This baseline does not satisfy Part 3.
 
 ## Query-plan spot check and efficiency
 
 An additional `EXPLAIN (ANALYZE, BUFFERS)` on candidate-ID lookup for `wheel spoke`
-used a bitmap scan on `patent_search_vector_gin` with and without `B60B`.
+was recorded as using a bitmap scan on `patent_search_vector_gin` with and
+without `B60B`.
 The classification filter removed 16 of 114 candidates. Reproduce that limited
-plan inspection in PostgreSQL with:
+plan inspection in PostgreSQL with (the plan output was not preserved):
 
 ```sql
 EXPLAIN (ANALYZE, BUFFERS)

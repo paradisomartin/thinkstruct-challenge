@@ -22,9 +22,8 @@
 - **Bruno:** Initially documented OpenAPI import. After user approval, installed
   global CLI 4.3.0 and verified version/help. npm emitted deprecated transitive
   dependency warnings; no additional install-script permissions granted.
-  User requested moving their collection from Documents into `tools/bruno/`:
-  reviewed four YAML files (only local base URL, no credentials), moved all five
-  files with matching hashes, and kept `.DS_Store` ignored.
+  Versioned the collection under `tools/bruno/` after checking that it contained
+  only a local base URL and no credentials.
   CLI smoke returned 200 for one health request, **0 tests/0 assertions**. Reports
   stay ignored under `artifacts/`; `make api-test` wraps the same collection.
   Generated examples are not test results. GUI import not independently tested.

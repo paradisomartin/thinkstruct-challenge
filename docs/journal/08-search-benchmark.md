@@ -12,6 +12,5 @@
   future executions write only to ignored `artifacts/`. No patent text or secrets.
 - Accepted indexed benchmark documentation: one report per selected experiment,
   immutable numbered snapshots, short root README and checkpoint entries.
-- Part 1 now has a tested search API and local timed filtered/unfiltered comparison.
-  Part 2 costs/design/designated PoC, one Part 3 enhancement and final delivery
-  verification/video remain pending. No at-scale performance claim.
+- These timings were later superseded by the
+  [ranking correction and new baseline](09-ranking-regression.md).

@@ -14,5 +14,5 @@
   measurements or an approved deployment configuration.
 - Checked calculations, local Markdown links, diagram XML and whitespace.
   Documentation-only work; backend tests were not rerun for this checkpoint.
-- No AWS deployment or spend. Part 2 still needs an explicitly verified PoC;
-  Part 3 selection and final delivery/video remain pending.
+- No AWS resources were deployed. The local PoC was subsequently verified in
+  [the next checkpoint](11-container-ingestion-poc.md).

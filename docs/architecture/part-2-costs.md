@@ -12,12 +12,9 @@ Prices were checked on **2026-11-16**, in USD, for **US East (N. Virginia),
 `us-east-1`**, using official AWS sources. This region is a budgeting example,
 not an approved deployment location; the diagram deliberately leaves it TBD.
 
-To use recent evidence rather than an old blog post, we also checked AWS's
-regional Price List catalogs. The ECS catalog was published on November 11,
-RDS on November 13 and S3 on November 16, 2026. The selected rates have an
-effective date of **November 1, 2026**. The other official pages do not all show
-a publication date: their date here is the consultation date, not a claim that
-AWS rewrote them this month.
+The selected ECS, RDS and S3 catalog rates are effective **November 1, 2026**.
+Catalog publication dates and SKUs are listed below. Page consultation dates
+are not publication dates.
 
 Use 730 hours/month and On-Demand prices. No Free Tier credits, Savings Plans,
 Reserved Instances, Spot discounts or tax deductions are assumed. Taxes,
@@ -46,7 +43,10 @@ There is no measured relationship yet between this instance size, the workload
 and a response-time target. In particular, 32 GiB RAM will not cache a 3 TiB
 database. The first sizing exercise must measure query plans, working set,
 storage/GIN growth, counting, evidence selection and ingestion contention.
-The 3 TiB allocation is a placeholder, not a proven storage requirement.
+The 3 TiB allocation is a sizing assumption, not a proven storage requirement.
+For comparison, the supplied JSON sample averages about 24.3 KiB per patent
+(15,939,070 bytes / 640); it does not establish the full corpus's average or
+the size of normalized rows and indexes.
 
 ## Monthly baseline
 
@@ -141,8 +141,10 @@ until database write/index contention becomes the bottleneck.
 
 ## Official sources and rate evidence
 
-All consulted on **2026-11-16**. Catalog URLs ending in `current` change over time;
-the publication dates and selected SKUs below identify what was inspected.
+All consulted on **2026-11-16**. The audit independently rechecked the selected
+ECS, RDS and S3 catalog rates and cost arithmetic. Catalog responses are not
+archived here; URLs ending in `current` can change, so these links do not
+reproduce a historical price quote.
 
 | Source | Rates / rules used |
 |---|---|

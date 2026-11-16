@@ -1,7 +1,7 @@
 # Architecture
 
-Start with the local system, then read the AWS proposal. The two documents
-separate what runs today from what still needs to be built and validated.
+Start with the implemented local system, then the AWS proposal. The PoC verifies
+one local slice of that proposal; the cost model supplies its budget assumptions.
 
 | Document | Scope | Status |
 |---|---|---|
@@ -13,7 +13,5 @@ separate what runs today from what still needs to be built and validated.
 The AWS proposal includes an [editable draw.io diagram](diagrams/architecture.drawio)
 and its [SVG preview](diagrams/architecture.svg).
 
-The cost document supplies explicit working assumptions, not approved production
-requirements. Refine them with representative measurements. The PoC verifies a
-small local slice, not the AWS integrations. Neither pricing nor the diagram proves that the proposed
-system can handle ten million patents.
+No AWS resources are deployed. Capacity at ten million patents requires
+representative query, ingestion and index-sizing measurements.

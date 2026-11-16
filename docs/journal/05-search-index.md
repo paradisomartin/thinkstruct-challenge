@@ -17,5 +17,5 @@
   No automated freshness detector or concurrent ingestion/rebuild guarantee.
 - PostgreSQL full-text position/size limits remain a baseline limitation,
   particularly for long descriptions; no claim of measured relevance quality.
-- Next: validated search inputs, literal filters before pagination, counts/rank,
-  traceable excerpts, then Ninja HTTP. No frontend or Part 3 selection added.
+- Search service and HTTP verification followed in
+  [the next checkpoint](06-search-service.md).

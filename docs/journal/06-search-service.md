@@ -21,5 +21,4 @@
 - Real-data smoke: `wheel spoke` returned 114 patents; adding `B60B` returned 98.
   The first three filtered results had claim evidence. These observations are
   not relevance judgments or a timed comparison.
-- Next: thin Ninja adapter, HTTP validation tests and Bruno assertions, then
-  reproducible filtered/unfiltered latency measurements. Part 3 remains unselected.
+- HTTP validation and Bruno checks followed in [search API verification](07-search-api.md).

@@ -19,5 +19,3 @@
 - Re-ran the same benchmark protocol. Preserved 001 as historical with a defect
   warning, and published [002](../benchmarks/002-search-ranking-fix.md) with its
   full JSON snapshot. Filter latency effects are mixed, not uniformly beneficial.
-- Next: isolated clean-start delivery check, Part 2 assumptions/costs/designated
-  PoC, explicit Part 3 selection. No new infrastructure or frontend introduced.

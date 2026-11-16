@@ -9,4 +9,5 @@ Add a new numbered report when preserving another experiment.
 | 001 | [Historical run: ranking defect, superseded](001-search-baseline.md) | [Raw JSON](results/001-search-baseline.json) |
 | 002 | [Correct weighted-ranking baseline](002-search-ranking-fix.md) | [Raw JSON](results/002-search-ranking-fix.json) |
 
-These measurements address Part 1, not the unselected Part 3 enhancement.
+These measurements address Part 1, not the selected but incomplete Part 3
+Interface at Scale enhancement.

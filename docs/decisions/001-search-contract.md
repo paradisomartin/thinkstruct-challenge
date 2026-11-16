@@ -3,7 +3,7 @@
 **Status:** Accepted · **Date:** 2026-11-16.
 User explicitly confirmed the contract before ingestion. Service implemented;
 HTTP adapter tested; local latency comparison recorded in the
-[baseline report](../benchmarks/001-search-baseline.md).
+[corrected baseline report](../benchmarks/002-search-ranking-fix.md).
 
 **Why:** Patent-level results with traceable passages keep the workflow explainable.
 Claim-only results are an alternative, but entries are not reliably complete or
@@ -32,7 +32,8 @@ score/ranking method (null score for filter-only lookup), source filename and
 zero-based record index. Excerpts contain original text, source field and original
 array index (null for scalar fields), or are null when unavailable. Prefer matching
 claims/descriptions, then matching title/abstract; no invented passage evidence
-from metadata-only matches. Window size remains to validate.
+from classification-only matches. The implementation returns one complete,
+unmodified excerpt, not a fixed-size text window.
 
 **Limits:** Scores are not probabilities/legal assessments; array positions are
 not legal claim numbers. No arbitrary-ID scraping, verified filing-date filter,

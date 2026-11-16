@@ -24,6 +24,4 @@
 - Collection tests reuse baseline search runtime variables in sequence and require
   ingestion plus explicit rebuilding. Reports remain ignored with bodies/headers
   omitted. Individual HTTP durations are diagnostics, not a controlled benchmark.
-- Next slice: reproducible filtered/unfiltered measurements with disclosed dataset,
-  hardware, warmup/repetitions, timing boundary and aggregation. Part 2 PoC and
-  Part 3 enhancement remain unselected.
+- Timing methodology and results followed in [the benchmark checkpoint](08-search-benchmark.md).

@@ -69,4 +69,5 @@ None of those optimizations is claimed measured here.
 
 This is neither an HTTP/load/cold-cache test nor a relevance evaluation.
 55 automated tests and 8 live Bruno requests / 9 script tests passed separately;
-they are correctness checks, not timing samples. Part 3 remains unselected.
+they are correctness checks, not timing samples. This report does not measure
+Part 3 interface interactions.

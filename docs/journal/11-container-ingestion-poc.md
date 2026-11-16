@@ -12,5 +12,5 @@
   volumes. The existing port-8000 API remained healthy; its volume was not targeted.
 - [Exact commands, results and limitations](../architecture/part-2-poc.md).
   This is local containerization, not an S3/ECS integration or scale benchmark.
-- Next: select exactly one Part 3 enhancement with the user, then complete the
-  final reproduction check and accessible Part 2/3 recording.
+- Part 3 selection and workspace initialization are recorded in
+  [React setup](12-react-workspace.md).
