@@ -25,8 +25,13 @@ npm run check
 npm run build
 ```
 
-`npm run preview` serves the built static app on port 4173, but does not provide
-the development API proxy. Production hosting and API routing are not configured.
-Dependencies are pinned and `package-lock.json` is committed. `node_modules/`
+TypeScript/build and development HTTP smoke checks passed. Browser rendering,
+linked-view interactions and accessibility have not been independently tested.
+
+After `npm run build`, `npm run preview` serves the built app on port 4173.
+In the pinned Vite version, preview inherits the `/api` proxy from `server.proxy`,
+so it also needs Django on port 8000. This is a local preview server;
+production hosting and API routing are not configured.
+Dependencies are pinned with `package-lock.json`. `node_modules/`
 and `dist/` stay ignored. Browser-exposed variables must never contain backend
 secrets. Django remains the sole backend; no Astro, Starlight or UI library.

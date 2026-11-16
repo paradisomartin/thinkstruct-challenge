@@ -1,8 +1,12 @@
 # Data placement
 
-The local dataset is now in `data/raw/`: 64 JSON files and 640 records, with the same fingerprint as the original discovery in `data/patent_data_small/`. It is not distributed through Git. Obtain the Thinkstruct-provided dataset separately and put extracted `patents_ipa{DATE}.json` files in `data/raw/`.
+Obtain the Thinkstruct-provided dataset separately and put extracted
+`patents_ipa{DATE}.json` files in `data/raw/`. It is not distributed through Git.
+The measured sample contains 64 JSON files and 640 records; its fingerprint is
+recorded in [dataset discovery](../docs/journal/01-dataset-discovery.md).
 
-The root `.gitignore` excludes all contents of `data/` except this README, including both dataset locations and ZIP files. Raw files remain unchanged.
+The root `.gitignore` excludes all contents of `data/` except this README,
+including ZIP files. Ingestion preserves the source files.
 
 The [root README](../README.md) owns profiling/ingestion commands. For a different dataset location, pass that directory to the profiler. See the [journal](../docs/journal/README.md) for the observed evidence. No download URL is supplied in the repository.
 

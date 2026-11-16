@@ -5,32 +5,27 @@ and classification/title/abstract filters, with ranked patents and traceable exc
 See the [original brief](docs/reference/thinkstruct-coding-task.pdf) and
 [accepted contract](docs/decisions/001-search-contract.md).
 
-**Status:** Dataset discovery, schema, and repeatable PostgreSQL ingestion verified.
-Local health/OpenAPI endpoints and explicit full-text index rebuilding are available.
-Search is available at `GET /api/patents/search`; benchmarks and the required
-enhancement remain pending.
+**Delivery status:** Part 1 search and local benchmarks are implemented. Part 2
+has an AWS design, cost model and locally verified container PoC. Part 3
+**Interface at Scale** is selected, but only its React setup screen exists.
+The required linked views, interaction measurements and ~2-minute Part 2/3
+recording are not yet available.
 
 ## Structure and approach
 
-```text
-backend/    Django configuration, patents domain, Dockerfile, dependencies, profiler
-frontend/   Deferred frontend boundary; no framework initialized
-data/       Ignored local dataset + placement instructions
-docs/       Decisions, journal, architecture, authoritative reference PDF
-tools/      Versioned Bruno collection for local HTTP smoke checks
-compose.yaml / Makefile / .env.example    Local workflow and configuration
-```
+Django provides persistence and migrations; Django Ninja exposes typed HTTP routes
+and OpenAPI. PostgreSQL provides English lexical retrieval and structured filters,
+without embedding infrastructure. One weighted search vector per patent and native
+`ts_rank` keep counts and ranking at patent level; original passage positions make excerpts
+traceable. [Local architecture](docs/architecture/part-1-local.md).
+`backend/` owns Django, `frontend/` owns React, and root Compose orchestrates the
+API/database. Optional rationale and evidence are indexed under `docs/`.
 
-Django + Django Ninja was chosen for implementer familiarity; Flask would be
-lighter for this scope. PostgreSQL will provide lexical full-text retrieval and
-structured filters, not semantic embeddings. [Backend boundaries](backend/README.md).
-Compose and one ignored `.env` stay at root; browser configuration, if added later,
-must never expose backend secrets.
+## Run Part 1
 
-## Local development
-
-Prerequisites: Make, Docker Engine running, Docker Compose, and the separately supplied
-JSON files extracted into `data/raw/`. Data is not published in Git; see
+Prerequisites: Make, Docker Engine running, Docker Compose v2 with `--wait` support,
+and the separately supplied JSON files extracted into `data/raw/`.
+The isolated Part 2 PoC requires Compose 2.24.4+. Data is not published in Git; see
 [data placement](data/README.md).
 
 From the repository root, create `.env` **only if it does not already exist**:
@@ -39,9 +34,9 @@ From the repository root, create `.env` **only if it does not already exist**:
 cp .env.example .env
 ```
 
-Replace both secret placeholders. Optional settings: `LOG_LEVEL=INFO`, `APP_PORT=8000`.
-Make handles Docker Desktop's bundled executable on macOS if CLI symlinks are
-missing; elsewhere `docker` must be on PATH (or supply `DOCKER=/path/to/docker`).
+Replace both secret placeholders. Defaults: `LOG_LEVEL=INFO`, `APP_PORT=8000`.
+Docker must be on PATH, or supply `DOCKER=/path/to/docker`; Make also supports
+Docker Desktop's bundled executable on macOS.
 
 ```sh
 make dev
@@ -49,41 +44,34 @@ make check
 make test
 make ingest ARGS=--dry-run
 make ingest
-make ingest
+make ingest                  # Repeating identical input should create nothing
 make reindex
 ```
 
-`make dev` builds, starts PostgreSQL, applies committed migrations, and starts
-Django's **development** server with reload at `http://localhost:8000` by default.
-Backend source is bind-mounted for editing and migration generation.
+`make dev` builds, migrates and starts Django's **development** server at
+`http://localhost:8000`. Database state persists in a named volume.
 
 | Command | Purpose |
 |---|---|
-| `make venv` | Optional local Python 3.13 environment for VS Code; no Docker required |
-| `make migrate` | Build/start DB and apply committed migrations |
-| `make makemigrations` | Generate migrations in `backend/`; review before applying |
 | `make check` | Django configuration and model/migration consistency |
-| `make reindex` | Rebuild all patent search vectors after ingestion |
 | `make benchmark` | Warm service comparison; writes ignored `artifacts/search-benchmark.json` |
 | `make health` | API/database readiness; unavailable DB returns HTTP 503 |
 | `make openapi` | Export live schema to ignored `artifacts/openapi.json` |
-| `make api-test` | Run `tools/bruno/` using the installed Bruno CLI |
+| `make api-test` | Optional live HTTP checks; [Bruno setup](tools/bruno/README.md) |
 | `make logs` | Follow long-lived API/database container logs |
 | `make status` / `make stop` | Inspect / stop services without deleting data |
 
-Dry-run counts mean *would create*; migrations must exist first. The second real
-ingest must create nothing. Invalid input/duplicate IDs/conflicting existing content
-or provenance abort the whole import; identical records are unchanged.
-Keep partial searchable patents, omit blank/canceled-only derived passages, and
-retain raw JSON and original positions. [Data policy](docs/decisions/002-data-policy.md).
+Dry-run counts mean *would create*. Invalid input, duplicate IDs or conflicting
+content/provenance abort the import; identical records are unchanged.
+Partial searchable patents are retained; blank/canceled-only passages are omitted
+from derived data, while raw JSON and positions are preserved.
+[Data policy](docs/decisions/002-data-policy.md).
 
 `make reindex` derives one English `tsvector` per patent from title (A),
 abstract/claims (B), and usable descriptions (D); a GIN index supports term lookup.
 Rebuild explicitly after ingestion: new patents have a null vector until then.
-Repeating unchanged ingestion preserves existing vectors. Direct edits to titles,
-abstracts or passages also require a rebuild; there is no automatic freshness
-detector or concurrent ingestion/rebuild protocol. The rebuild is one atomic update
-for this sample, not a streaming large-scale indexer.
+Direct text edits also require rebuilding; there is no automatic freshness
+detector or concurrent ingestion/rebuild protocol.
 
 Reproduce read-only discovery separately (Python 3.9+; no dependencies):
 
@@ -91,116 +79,15 @@ Reproduce read-only discovery separately (Python 3.9+; no dependencies):
 python3 backend/scripts/profile_dataset.py data/raw
 ```
 
-PostgreSQL has no published host port; source data is mounted read-only.
-The API is bound only to host loopback. Its healthcheck tests `SELECT 1`, not
-whether the dataset or search index is ready. Database state persists in a named volume.
-Do not use `down -v` unless you intend to delete that database.
-No production HTTP server or cloud deployment is configured.
-
-### Optional local editor environment
-
-Docker already contains the runtime dependencies. A local environment is only
-needed if VS Code/Pylance analyzes the repository from the host instead of attaching
-to the container. It does not replace Docker or require a local PostgreSQL server.
-
-With host Python 3.13 installed, run from the repository root:
-
-```sh
-make venv
-# If Python is elsewhere: make venv PYTHON=/path/to/python3.13
-```
-
-On macOS with Homebrew, install Python if missing with `brew install python@3.13`.
-The Make target creates `.venv` only when absent, validates Python 3.13, and installs
-`backend/requirements.lock`. Rerun it after dependency changes. It never replaces
-an existing environment; if its Python version is wrong, move it aside explicitly
-before retrying. No shell activation is required.
-
-In the **local** VS Code window, run **Python: Select Interpreter** and choose
-`${workspaceFolder}/.venv/bin/python` (or use **Enter interpreter path**).
-For backend-local imports, merge these entries into `.vscode/settings.json`,
-preserving other preferences:
-
-```json
-{
-  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-  "python.analysis.extraPaths": ["${workspaceFolder}/backend"]
-}
-```
-
-Selecting the interpreter explicitly also updates an existing workspace selection;
-`defaultInterpreterPath` alone may not change it. Reload the window if diagnostics
-persist. Keep Python/Pylance enabled; Dev Containers is optional and can be disabled
-when using this workflow. `.venv/` is ignored; keep editor settings local.
-Continue using `make dev`, `make check` and `make test` for execution in Docker:
-the host environment does not inherit Compose's database hostname or credentials.
-
-Optional fish shell convenience (personal configuration, outside this repository):
-
-```fish
-alias --save py python3
-source .venv/bin/activate.fish
-py --version
-# Leave the environment with: deactivate
-```
-
-`py` follows the `python3` found on PATH: Python 3.13 while this environment is
-active, your existing global Python otherwise. Installing Homebrew's versioned
-Python does not necessarily change the global `python3`. `make venv` deliberately
-uses `python3.13` (or `PYTHON=...`) rather than shell aliases.
-
-### Logs
-
-English application logs explain ingestion stages, counts, dry runs, errors, and
-elapsed time; DEBUG adds source-file validation messages. Logs go to stderr;
-the ingestion command's final JSON remains on stdout. Application stage logs
-do not print patent text or secrets. `make ingest` shows its one-off logs directly;
-`make logs` follows the running services. For extra local detail:
-
-```sh
-LOG_LEVEL=DEBUG make ingest ARGS=--dry-run
-```
-
-### Try the API with Bruno
-
-No user accounts or authentication are configured for this loopback-only MVP.
-Ninja generates the contract; do not maintain a separate handwritten OpenAPI spec.
-
-1. Run `make dev`, then `make health` and `make openapi`.
-2. In Bruno, choose **Import → OpenAPI** and select `artifacts/openapi.json`.
-   Alternatively import `http://localhost:8000/api/openapi.json` by URL.
-3. Set the imported collection's server/base URL to `http://localhost:8000`
-   (adjust for `APP_PORT`). Paths already contain `/api`; do not add it twice.
-4. Send `GET /api/health`; expect `200` and
-   `{"status":"ok","database":"ok"}`. The versioned collection already has tests.
-
-Interactive docs: `http://localhost:8000/api/docs`. Re-export/re-import when new
-routes or schemas appear; import is not automatic synchronization or test generation.
-The imported collection is versioned in `tools/bruno/`; open that directory in
-Bruno instead of the former Documents location. Its environment
-`ThinkStruct Challenge Env` contains only the non-secret local `baseUrl`.
-For the optional CLI workflow (requires host Node.js/npm):
-
-```sh
-npm install --global @usebruno/cli@4.3.0
-make api-test
-```
-
-Verified: **8 requests, 9 script tests pass** (Bruno's separate declarative
-Assertions counter is zero). Covers health, ranked/filtered search, pagination,
-title lookup, no matches, stop words and invalid pagination. Requires the supplied
-dataset to be ingested/indexed; run the collection in order because pagination
-and filtered checks reuse the first search's runtime variables.
-The report goes to ignored `artifacts/bruno-report.json` with headers/bodies
-omitted. `make test` separately verifies deterministic fixtures, simulated 503
-cases and database integrity/rollback. Keep secrets out of
-tracked environments. Generate future imports separately before merging to avoid
-overwriting curated requests/assertions. GUI import was not independently tested.
-[Bruno's import guide](https://docs.usebruno.com/open-api/importOAS).
+PostgreSQL has no published host port; the API binds to loopback without
+authentication. Health checks database connectivity, not index readiness.
+Source data is read-only. Do not use `down -v`: it deletes persisted database data.
+Optional editor setup and logging details: [backend guide](backend/README.md).
 
 ### Search examples
 
-After `make ingest` and `make reindex`, use Swagger or:
+After ingestion and rebuilding, open `http://localhost:8000/api/docs` or run
+(adjust the port if using `APP_PORT`):
 
 ```sh
 curl --get http://localhost:8000/api/patents/search \
@@ -213,21 +100,25 @@ curl --get http://localhost:8000/api/patents/search \
   --data-urlencode 'title_exact=spoke'
 ```
 
-All constraints combine with AND. Repeat `title_keywords` or `abstract_keywords`
-for multiple literal tokens. Exact titles are casefolded with whitespace collapsed.
-Text retrieval uses English stemming and AND across lexemes; stop-word-only queries
-are rejected even when a filter is supplied. Pagination defaults to limit 20,
-offset 0, with limit 1–100. Responses include `total_matches` before pagination,
-`effective_request` and `results` with source positions and unmodified excerpts.
-An excerpt may match only part of a cross-field query; scores are not probabilities.
-Filter-only lookup has null scores; classification-only lookup has null excerpts.
+All constraints combine with AND. Query lexemes also combine with AND, using
+English stemming and no raw query operators. Title/abstract
+keywords are literal tokens (repeat parameters for multiple terms). Exact titles
+ignore case and collapsed whitespace. Stop-word-only queries return 422.
+Pagination defaults to limit 20 / offset 0, with limit 1–100.
 
-Invalid input returns 422 (`detail` is text for domain validation or a list for
-Ninja parameter validation); database failures return a sanitized 503.
-Literal title/abstract filters scan candidate metadata in Python before SQL
-count/ranking/pagination: correct for this sample, not a large-scale metadata index.
+Responses contain pre-pagination counts, effective filters, scores and unmodified
+excerpts with source positions. An excerpt may explain only part of a cross-field
+query. Filter-only scores and classification-only excerpts are null.
+Database failures return a sanitized 503. [Full contract](docs/decisions/001-search-contract.md).
 
-## Verified results and versions
+## Tests and measured results
+
+`make test` runs PostgreSQL-backed fixtures, including ingestion rollback,
+index freshness, SQL-reference ranking, filters, provenance and HTTP errors.
+It does not require the supplied dataset. The audit reran all **55 tests**
+successfully on 2026-11-16 and reproduced the dataset fingerprint.
+The [journal](docs/journal/README.md) records ingestion and PoC verification;
+the PoC was not rerun during this editorial pass.
 
 | Check | Observed result |
 |---|---|
@@ -239,13 +130,9 @@ count/ranking/pagination: correct for this sample, not a large-scale metadata in
 | Correctness | 55 ingestion/index/search/HTTP/benchmark/logging/health/OpenAPI/docs tests pass |
 | HTTP collection | 8 requests and 9 Bruno script tests pass |
 
-All 119 patents lacking usable descriptions remain retained. Full evidence,
-dataset fingerprint, caveats, and learning: [journal](docs/journal/README.md).
+All 119 patents lacking usable descriptions are retained.
 
-Verified runtime: Python **3.13.18**, Django **5.2.19** (LTS series), Ninja **1.8.0**,
-psycopg **3.3.9**, PostgreSQL **18.7**. Direct/resolved dependencies are in
-`backend/requirements.in` / `backend/requirements.lock`; base image digests are
-pinned in the Dockerfile and Compose. Pins still need deliberate security updates.
+Recorded runtime and dependency pins: [backend guide](backend/README.md).
 
 ### Filtered/unfiltered service benchmark
 
@@ -255,26 +142,73 @@ Reproduce after ingestion and rebuilding:
 make benchmark
 ```
 
-On 640 patents, filters had mixed latency effects with the corrected weighted
-ranking; this is not a general speedup or large-scale capacity claim.
+On 640 patents / 31,671 passages, using 3 warmups and 20 measured calls per
+variant, alternating order, limit 20 and warm caches:
+
+| Query | Added filter | Matches without → with | p50 ms without → with |
+|---|---|---:|---:|
+| `wheel spoke` | Classification `B60B` | 114 → 98 | 124.975 → 146.207 |
+| `pneumatic tire` | Classification `B60C` | 169 → 158 | 136.037 → 132.775 |
+| `wheel` | Title token `wheel` | 417 → 163 | 140.051 → 144.832 |
+| `pressure` | Abstract token `pressure` | 215 → 29 | 110.399 → 103.944 |
+
+These are sequential service-call timings on an Apple M1 host (8 CPUs, 8 GiB;
+Docker VM about 3.82 GiB), excluding HTTP and serialization. Filters had mixed
+latency effects; fewer candidates do not guarantee faster excerpt selection.
+This is not a load test or large-scale capacity claim.
 [Methodology, environment, results and limitations](docs/benchmarks/002-search-ranking-fix.md)
 include a versioned raw JSON snapshot. New runs write only to ignored
 `artifacts/search-benchmark.json`; they do not overwrite that baseline.
 
-## Remaining challenge work
+## Part 2 — Scale design and PoC
 
-- Part 1: search, filters, provenance and local latency comparison implemented.
-- Part 2: [AWS design](docs/architecture/part-2-aws.md) and
-  [approximate costs](docs/architecture/part-2-costs.md) documented;
-  [on-demand container PoC](docs/architecture/part-2-poc.md) verified in an isolated
-  database from the built image. No AWS deployment or at-scale capacity demonstrated.
-- Part 3: **Interface at Scale** selected; [React workspace](frontend/README.md)
-  initialized. Linked views, consistent counts, stale-response protection and
-  interaction measurements remain to be implemented.
-- Delivery: add reproducible Part 1/3 commands/results and an accessible ~2-minute
-  Part 2/3 screen recording. Demo not yet recorded.
+The [AWS design](docs/architecture/part-2-aws.md) separates Fargate API tasks
+from on-demand ingestion, with RDS PostgreSQL and immutable sources in S3.
+It covers bounded batches, durable import status, retries, networking and backups
+as proposed work. The target is 10 million patents, not demonstrated capacity.
 
-Starlight, Celery/Redis,
-and live AWS deployment are extras only if time and demonstrated need justify them.
-Process and approvals: [decisions](docs/decisions/README.md). D-011 retrieval configuration
-is implemented through HTTP with local measurements; Part 2/3 remain incomplete.
+The [cost model](docs/architecture/part-2-costs.md) budgets about $1,120/month
+Single-AZ or $1,966 with one RDS standby, before 20% contingency. These are
+assumption-based estimates, not expenses or validated instance sizing.
+The [container PoC](docs/architecture/part-2-poc.md) includes exact isolated
+Compose commands and recorded results: 640 patents indexed, idempotent reimport
+and HTTP checks from image code. No AWS deployment is required by this PoC.
+
+## Part 3 — Interface at Scale (incomplete)
+
+Selected to let reviewers narrow a result set without losing context between
+views. The approved design is a results list, classification drill-down and weekly
+timeline sharing filters and counts, with stale-response protection.
+
+To run the **setup screen only**, start the API above, then:
+
+```sh
+cd frontend
+npm ci
+npm run dev
+```
+
+Requires Node.js 22.12+ and npm. Open `http://127.0.0.1:5173`.
+[Frontend commands and proxy details](frontend/README.md).
+There are no linked search views, facet/date API, request-race tests or
+filter-to-render measurements yet; Part 1 timings do not satisfy Part 3.
+Source filenames contain dates, but legal filing-date semantics are unverified.
+
+At 10 million patents, the interface would need server-side indexed filtering
+and aggregation over the same result set, bounded pagination and evidence work,
+and a request-versioning contract to keep all views consistent. These are design
+requirements, not implemented optimizations.
+
+## Limitations and submission checklist
+
+- Lexical English matching can miss paraphrases. Weights are heuristics; no
+  relevance evaluation or legal novelty assessment was performed.
+- Python metadata scans, whole-sample ingestion and full index rebuilds are sample-scale.
+  Vectors require explicit rebuilding; PostgreSQL full-text size/position limits
+  matter for long documents.
+- To complete submission: implement and measure Part 3, document its reproducible
+  results, and add an accessible ~2-minute recording covering Parts 2 and 3.
+
+Optional evidence: [architecture](docs/architecture/README.md),
+[benchmarks](docs/benchmarks/README.md), [decisions](docs/decisions/README.md),
+[engineering journal](docs/journal/README.md).
