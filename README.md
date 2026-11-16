@@ -7,7 +7,8 @@ See the [original brief](docs/reference/thinkstruct-coding-task.pdf) and
 
 **Status:** Dataset discovery, schema, and repeatable PostgreSQL ingestion verified.
 Local health/OpenAPI endpoints and explicit full-text index rebuilding are available.
-The search service is tested; its HTTP endpoint and required enhancement are pending.
+Search is available at `GET /api/patents/search`; benchmarks and the required
+enhancement remain pending.
 
 ## Structure and approach
 
@@ -117,7 +118,7 @@ Ninja generates the contract; do not maintain a separate handwritten OpenAPI spe
 3. Set the imported collection's server/base URL to `http://localhost:8000`
    (adjust for `APP_PORT`). Paths already contain `/api`; do not add it twice.
 4. Send `GET /api/health`; expect `200` and
-   `{"status":"ok","database":"ok"}`. Add explicit response assertions in Bruno.
+   `{"status":"ok","database":"ok"}`. The versioned collection already has tests.
 
 Interactive docs: `http://localhost:8000/api/docs`. Re-export/re-import when new
 routes or schemas appear; import is not automatic synchronization or test generation.
@@ -131,15 +132,46 @@ npm install --global @usebruno/cli@4.3.0
 make api-test
 ```
 
-Verified: one health request returns HTTP 200. The imported collection currently
-has **zero assertions/tests**; this is connectivity smoke coverage, not response
-contract validation. The report goes to ignored `artifacts/bruno-report.json`
-with headers/bodies omitted. `make test` separately verifies status/body and
-the simulated 503 case, plus database integrity/rollback.
-Only health is implemented; search requests will follow. Keep secrets out of
+Verified: **8 requests, 9 script tests pass** (Bruno's separate declarative
+Assertions counter is zero). Covers health, ranked/filtered search, pagination,
+title lookup, no matches, stop words and invalid pagination. Requires the supplied
+dataset to be ingested/indexed; run the collection in order because pagination
+and filtered checks reuse the first search's runtime variables.
+The report goes to ignored `artifacts/bruno-report.json` with headers/bodies
+omitted. `make test` separately verifies deterministic fixtures, simulated 503
+cases and database integrity/rollback. Keep secrets out of
 tracked environments. Generate future imports separately before merging to avoid
 overwriting curated requests/assertions. GUI import was not independently tested.
 [Bruno's import guide](https://docs.usebruno.com/open-api/importOAS).
+
+### Search examples
+
+After `make ingest` and `make reindex`, use Swagger or:
+
+```sh
+curl --get http://localhost:8000/api/patents/search \
+  --data-urlencode 'query=wheel spoke' \
+  --data-urlencode 'classification_prefix=B60B' \
+  --data-urlencode 'title_keywords=wheel' \
+  --data-urlencode 'limit=5'
+
+curl --get http://localhost:8000/api/patents/search \
+  --data-urlencode 'title_exact=spoke'
+```
+
+All constraints combine with AND. Repeat `title_keywords` or `abstract_keywords`
+for multiple literal tokens. Exact titles are casefolded with whitespace collapsed.
+Text retrieval uses English stemming and AND across lexemes; stop-word-only queries
+are rejected even when a filter is supplied. Pagination defaults to limit 20,
+offset 0, with limit 1–100. Responses include `total_matches` before pagination,
+`effective_request` and `results` with source positions and unmodified excerpts.
+An excerpt may match only part of a cross-field query; scores are not probabilities.
+Filter-only lookup has null scores; classification-only lookup has null excerpts.
+
+Invalid input returns 422 (`detail` is text for domain validation or a list for
+Ninja parameter validation); database failures return a sanitized 503.
+Literal title/abstract filters scan candidate metadata in Python before SQL
+count/ranking/pagination: correct for this sample, not a large-scale metadata index.
 
 ## Verified results and versions
 
@@ -150,7 +182,8 @@ overwriting curated requests/assertions. GUI import was not independently tested
 | Skipped passage entries | 20,819 blank; 128 standalone canceled markers |
 | Repeat ingestion | 640 unchanged; 0 new patents or passages |
 | Search index | 640 non-null patent vectors; GIN migration applied |
-| Correctness | 35 ingestion/index/search/logging/health/OpenAPI/docs tests pass |
+| Correctness | 42 ingestion/index/search/HTTP/logging/health/OpenAPI/docs tests pass |
+| HTTP collection | 8 requests and 9 Bruno script tests pass |
 
 All 119 patents lacking usable descriptions remain retained. Full evidence,
 dataset fingerprint, caveats, and learning: [journal](docs/journal/README.md).
@@ -167,7 +200,7 @@ filters and verify correctness; filter selectivity alone does not prove a speedu
 
 ## Remaining challenge work
 
-- Part 1: implement search, verify evidence/filter semantics, and compare latency.
+- Part 1: measure filtered/unfiltered search latency and explain efficiency limits.
 - Part 2: complete [architecture](docs/architecture.md), explicit cost assumptions,
   and one designated PoC for ~10 million patents.
 - Part 3: select **one** enhancement and meet its exact validation criteria.
@@ -177,5 +210,5 @@ filters and verify correctness; filter selectivity alone does not prove a speedu
 Starlight, React (unless required by the selected enhancement), Celery/Redis,
 and live AWS deployment are extras only if time and demonstrated need justify them.
 Process and approvals: [decisions](docs/decisions/README.md). D-011 retrieval configuration
-is implemented at service level (index, filters, ranking, provenance, tests);
-next expose HTTP search and measure filtered/unfiltered latency.
+is implemented through HTTP (index, filters, ranking, provenance, tests);
+next measure filtered/unfiltered latency.

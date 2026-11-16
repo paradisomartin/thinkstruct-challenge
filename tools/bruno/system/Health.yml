@@ -10,6 +10,25 @@ http:
   url: "{{baseUrl}}/api/health"
   auth: inherit
 
+scripts:
+  - type: tests
+    code: |
+      test("API and database are ready", function () {
+        expect(res.getStatus()).to.equal(200);
+        expect(res.getBody()).to.deep.equal({status: "ok", database: "ok"});
+      });
+
+runtime:
+  scripts:
+    - type: tests
+      code: |
+        test("Health status is 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+        test("Application and database are ready", function () {
+          expect(res.getBody()).to.deep.equal({status: "ok", database: "ok"});
+        });
+
 settings:
   encodeUrl: true
   timeout: 0
@@ -51,8 +70,8 @@ examples:
         type: json
         data: |-
           {
-            "status": "ok",
-            "database": "ok"
+            "status": "unavailable",
+            "database": "unavailable"
           }
 
 docs: "Readiness: the application can execute a query against PostgreSQL."

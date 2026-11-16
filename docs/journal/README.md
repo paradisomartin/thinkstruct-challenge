@@ -12,6 +12,7 @@ Approvals: [decisions](../decisions/README.md).
 | Local workflow | [Logs, health, Make, OpenAPI](04-local-workflow.md) |
 | Search index | [Persisted vectors and explicit rebuild](05-search-index.md) |
 | Search service | [Filters, ranking and evidence](06-search-service.md) |
+| Search API | [HTTP contract and Bruno tests](07-search-api.md) |
 
 Documentation was consolidated from seven starter files in commit `e605994`,
 then explicitly split into indexed decision/checkpoint folders at user request.
@@ -28,5 +29,5 @@ were published to `origin/main`; newer local changes are not implied published.
 - [ ] Exactly one Part 3 enhancement and its validation
 - [ ] Final reproducible README and accessible ~2-minute Part 2/3 video
 
-**Next:** Expose the tested D-011 search service through Ninja, then benchmark.
-No search endpoints, search benchmarks, frontend, or at-scale validation yet.
+**Next:** Benchmark equivalent searches with/without filters.
+No controlled search benchmarks, frontend, or at-scale validation yet.

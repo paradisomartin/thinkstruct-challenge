@@ -2,7 +2,7 @@
 
 **Status:** Accepted · **Date:** 2026-11-16.
 User explicitly confirmed the contract before ingestion. Service implemented;
-HTTP adapter and latency comparison remain pending.
+HTTP adapter implemented; latency comparison remains pending.
 
 **Why:** Patent-level results with traceable passages keep the workflow explainable.
 Claim-only results are an alternative, but entries are not reliably complete or

@@ -1,0 +1,16 @@
+info:
+  name: Reject stop words
+  type: http
+  seq: 6
+http:
+  method: GET
+  url: "{{baseUrl}}/api/patents/search?query=the%20and%20of"
+  auth: inherit
+runtime:
+  scripts:
+  - type: tests
+    code: |
+      test("Stop-word-only query is rejected", function () {
+        expect(res.getStatus()).to.equal(422);
+        expect(res.getBody().detail).to.include("no searchable");
+      });

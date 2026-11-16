@@ -1,0 +1,17 @@
+info:
+  name: No matches
+  type: http
+  seq: 5
+http:
+  method: GET
+  url: "{{baseUrl}}/api/patents/search?query=zzthinkstructnomatchzz"
+  auth: inherit
+runtime:
+  scripts:
+  - type: tests
+    code: |
+      test("No matches is an empty successful response", function () {
+        expect(res.getStatus()).to.equal(200);
+        expect(res.getBody().total_matches).to.equal(0);
+        expect(res.getBody().results).to.deep.equal([]);
+      });

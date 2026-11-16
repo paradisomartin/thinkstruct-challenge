@@ -1,14 +1,16 @@
-"""Infrastructure routes; patent search routes will belong to the patents app."""
+"""API composition and infrastructure routes."""
 
 import logging
 from typing import Literal
 
 from django.db import connection, DatabaseError
 from ninja import NinjaAPI, Schema
+from patents.api import router as patents_router
 
 
 logger = logging.getLogger("thinkstruct.health")
 api = NinjaAPI(title="Thinkstruct API", version="0.1.0")
+api.add_router("/patents", patents_router)
 
 
 class HealthResponse(Schema):
