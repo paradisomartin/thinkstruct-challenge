@@ -1,0 +1,30 @@
+# Supplied datasets and generated data stay local.
+/data/*
+!/data/README.md
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python and test artifacts
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases and generated artifacts
+*.db
+*.sqlite
+*.sqlite3
+/pgdata/
+/artifacts/
+node_modules/
+dist/
+.astro/
+.DS_Store
