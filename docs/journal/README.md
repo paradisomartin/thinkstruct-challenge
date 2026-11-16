@@ -20,6 +20,8 @@ Approvals: [decisions](../decisions/README.md).
 | Frontend workspace | [Vite, React and TypeScript setup](12-react-workspace.md) |
 | Exploration API | [Versioned HTTP layer and consistent linked counts](13-exploration-api.md) |
 | Linked interface | [Live views, request races and browser measurements](14-linked-interface.md) |
+| Docker frontend | [Optional development container](15-docker-frontend.md) |
+| Figma styling | [Desktop design adaptation](16-figma-desktop.md) |
 
 ## Delivery checklist
 
@@ -28,7 +30,10 @@ Approvals: [decisions](../decisions/README.md).
 - [x] Search/evidence/filter correctness and local measured latency comparison
 - [x] Part 2 architecture/cost assumptions and one designated PoC
 - [x] Exactly one Part 3 enhancement and its sample-scale validation
-- [ ] Final reproducible README and accessible ~2-minute Part 2/3 video
+- [x] Reproduction commands, measured results and implementation/tests pushed
+- [ ] Accessible ~2-minute Part 2/3 video linked from the README
 
-**Next:** Final delivery review, commit/push and accessible Part 2/3 recording.
+**Next:** Record the Part 2/3 walkthrough, add its accessible link and publish
+the final documentation changes. The optional Docker frontend and supplied
+Figma desktop styling are implemented, not additional challenge requirements.
 No AWS deployment or at-scale validation is claimed.

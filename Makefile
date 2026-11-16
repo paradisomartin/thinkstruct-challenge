@@ -13,11 +13,15 @@ PYTHON ?= python3.13
 
 .PHONY: help venv build db dev migrate makemigrations check test ingest reindex benchmark health openapi api-test logs status stop
 .PHONY: frontend-install frontend-dev frontend-check frontend-build frontend-preview frontend-test frontend-unit-test
+.PHONY: dev-all frontend-docker-stop frontend-docker-test
 
 help:
 	@printf '%s\n' \
 	  'make venv            Prepare optional host Python 3.13 environment for the editor' \
 	  'make dev             Build, migrate, and start the local API with reload' \
+	  'make dev-all         Start API/database and optional Docker frontend' \
+	  'make frontend-docker-stop Stop only the Docker frontend' \
+	  'make frontend-docker-test Run Vitest in the running frontend container' \
 	  'make frontend-install Install frontend dependencies from the lockfile (requires Node.js/npm)' \
 	  'make frontend-dev    Run the frontend development server on port 5173' \
 	  'make frontend-check  Check frontend TypeScript' \
@@ -58,6 +62,15 @@ db:
 
 dev: migrate
 	@$(COMPOSE) up -d --wait app
+
+dev-all: dev
+	@$(COMPOSE) --profile frontend up -d --build --wait frontend
+
+frontend-docker-stop:
+	@$(COMPOSE) --profile frontend stop frontend
+
+frontend-docker-test:
+	@$(COMPOSE) --profile frontend exec -T frontend npm test
 
 migrate: build db
 	@$(RUN) python manage.py migrate
@@ -102,7 +115,7 @@ status:
 	@$(COMPOSE) ps
 
 stop:
-	@$(COMPOSE) stop
+	@$(COMPOSE) --profile frontend stop
 
 frontend-install:
 	@npm --prefix frontend ci

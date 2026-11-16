@@ -10,6 +10,11 @@ one local slice of that proposal; the cost model supplies its budget assumptions
 | [Part 2 — Approximate costs](part-2-costs.md) | November 2026 AWS rates, budget assumptions and Single-AZ / Multi-AZ scenarios | Estimate, not measured capacity |
 | [Part 2 — Container ingestion PoC](part-2-poc.md) | Disposable jobs, isolated PostgreSQL and search from the built image | Verified locally on the supplied sample |
 
+Part 3's implemented React views and consistency contract are described in
+[D-005](../decisions/005-enhancement.md); reproduction is in the
+[frontend guide](../../frontend/README.md), with
+[browser measurements](../benchmarks/003-linked-interface.md).
+
 The AWS proposal includes an [editable draw.io diagram](diagrams/architecture.drawio)
 and its [SVG preview](diagrams/architecture.svg).
 

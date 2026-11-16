@@ -17,8 +17,11 @@ Django remains the API; the development Vite proxy avoids adding CORS for now.
 
 The approved styling foundation uses Tailwind CSS 4's official Vite plugin and
 daisyUI 5's built-in `corporate` theme through CSS configuration. React owns
-behavior; daisyUI supplies styles, not search logic. Visual refinements are
-deferred in favor of the live linked-view workflow.
+behavior; daisyUI supplies styles, not search logic. The user subsequently supplied
+a [Figma desktop design](https://www.figma.com/design/nhVo8ZpPfyB6G3dEk62ijB/Thinkstruct-Challenge---Martin-Paradiso?node-id=3-2),
+implemented by overriding corporate's palette/radii, loading Mozilla Text locally
+and using a horizontal blue gradient. Existing filters and live counts remain;
+desktop fidelity is prioritized over a separate mobile design.
 
 ## Accepted exploration contract
 

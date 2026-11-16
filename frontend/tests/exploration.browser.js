@@ -124,7 +124,7 @@
     await until(() => !!document.querySelector('[role="alert"]'));
     assert(!document.querySelector('[data-testid="linked-views"]'), "Network error shows old views");
     window.fetch = realFetch;
-    button("Retry").click();
+    document.querySelector('button[aria-label="Retry"]').click();
     await ready(0);
   } finally { window.fetch = realFetch; }
   passed.push("Loading isolation, stale success/error rejection even without abort, network error and retry");

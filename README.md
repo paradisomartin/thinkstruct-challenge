@@ -7,9 +7,10 @@ See the [original brief](docs/reference/thinkstruct-coding-task.pdf) and
 
 **Delivery status:** Part 1 search and local benchmarks are implemented. Part 2
 has an AWS design, cost model and locally verified container PoC. Part 3
-**Interface at Scale** is selected, but only its React visual preview exists.
-The required linked views, interaction measurements and ~2-minute Part 2/3
-recording are not yet available.
+**Interface at Scale** has three linked React views, stale-response protection,
+frontend integration/E2E checks and recorded sample-scale update measurements.
+The remaining submission requirement is an accessible ~2-minute Part 2/3 recording;
+no recording link has been published yet.
 
 ## Structure and approach
 
@@ -19,7 +20,8 @@ without embedding infrastructure. One weighted search vector per patent and nati
 `ts_rank` keep counts and ranking at patent level; original passage positions make excerpts
 traceable. [Local architecture](docs/architecture/part-1-local.md).
 `backend/` owns Django, `frontend/` owns React, and root Compose orchestrates the
-API/database. Optional rationale and evidence are indexed under `docs/`.
+API/database plus an optional development frontend. Optional rationale and evidence
+are indexed under `docs/`.
 
 ## Run Part 1
 
@@ -60,6 +62,7 @@ make reindex
 | `make api-test` | Optional live HTTP checks; [Bruno setup](tools/bruno/README.md) |
 | `make logs` | Follow long-lived API/database container logs |
 | `make status` / `make stop` | Inspect / stop services without deleting data |
+| `make dev-all` | Start API/database and the optional Docker frontend |
 
 Dry-run counts mean *would create*. Invalid input, duplicate IDs or conflicting
 content/provenance abort the import; identical records are unchanged.
@@ -129,6 +132,8 @@ The original PoC run predates the v1 refactor.
 | Search index | 640 non-null patent vectors; GIN migration applied |
 | Correctness | 71 domain/HTTP/benchmark/logging/health/OpenAPI/docs tests pass |
 | HTTP collection | 9 requests and 10 Bruno script tests pass |
+| Frontend integration | 4 Vitest/jsdom tests pass with synthetic HTTP responses |
+| Live frontend | Browser workflow/race checks pass on 640 patents; [timings](docs/benchmarks/003-linked-interface.md) |
 
 All 119 patents lacking usable descriptions are retained.
 
@@ -190,6 +195,22 @@ make frontend-dev
 
 Requires Node.js 22.12+ and npm. Open `http://127.0.0.1:5173`.
 [Frontend commands and proxy details](frontend/README.md).
+
+Alternatively, run the frontend in Docker without installing Node on the host:
+
+```sh
+make dev-all
+```
+
+Open the same URL. Stop local Vite first to free port 5173, or use
+`make dev-all FRONTEND_PORT=5174` and open `http://127.0.0.1:5174`.
+First startup downloads the Node image and installs locked npm dependencies.
+The frontend uses a separate dependency volume; PostgreSQL data is unchanged.
+`make frontend-docker-test` runs Vitest in the running container.
+`make frontend-docker-stop` stops only that frontend; `make stop` stops all
+Compose services. Host-run Vite still requires Ctrl+C in its terminal.
+This runs Vite for local development, not production hosting.
+
 The frontend consumes `/api/v1/patents/explore`. Results, classification
 drill-down and a selectable weekly distribution share filters and one response.
 Click a classification, week or result-card metadata button to filter all views.
@@ -249,8 +270,9 @@ requirements, not implemented optimizations.
 - Python metadata scans, whole-sample ingestion and full index rebuilds are sample-scale.
   Vectors require explicit rebuilding; PostgreSQL full-text size/position limits
   matter for long documents.
-- To complete submission: final delivery review, push the code and add an
-  accessible ~2-minute recording covering Parts 2 and 3.
+- Code and tests have been pushed to the GitHub repository. To complete submission,
+  record an accessible ~2-minute walkthrough of Parts 2 and 3, add its link here,
+  and publish any final documentation changes.
 
 Optional evidence: [architecture](docs/architecture/README.md),
 [benchmarks](docs/benchmarks/README.md), [decisions](docs/decisions/README.md),

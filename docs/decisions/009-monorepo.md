@@ -3,9 +3,9 @@
 **Status:** Accepted · **Date:** 2026-11-16.
 
 User requested root backend/frontend boundaries and layered responsibilities.
-Use Django `config/` plus a domain-local `patents/` app for API adapters/schemas,
-services, models, migrations, and tests. Prefer this over global folders mixing
-domains.
+The initial layout used Django `config/` plus a domain-local `patents/` app for
+API adapters/schemas, services, models, migrations and tests. The HTTP placement
+was subsequently superseded by the approved centralized boundary below.
 
 The user subsequently approved a centralized HTTP boundary:
 `api/api.py` composes Ninja, `api/v1/patents/{api,schemas}.py` defines the v1
@@ -27,12 +27,18 @@ ingestion design.
 
 ## Frontend development runtime
 
-Keep Node/npm on the host for Vite; Django and PostgreSQL remain in Docker Compose.
-The user approved this split after verifying local startup. Root `frontend-*`
-Make targets wrap npm, while `make dev` continues to start the backend.
+The initially approved default keeps Node/npm on the host for Vite; Django and
+PostgreSQL stay in Compose. Host `frontend-*` Make targets remain available and
+`make dev` continues to start only the backend.
 
-A Node development container would pin the runtime and avoid a host installation,
-but adds bind-mount, dependency-volume and network/proxy configuration. Defer it
-until needed; the frontend lockfile already pins dependencies. A running Vite
-process must be stopped before reinstalling dependencies. Production static
-hosting is a separate decision and does not require a long-running Vite server.
+The user subsequently approved an optional Node development container:
+`make dev-all` enables Compose profile `frontend`. It uses a digest-pinned Node 26
+image, non-root user, source bind mount, isolated `frontend_node_modules` volume
+and `/api` proxy to `app:8000`. Startup refreshes dependencies with `npm ci`;
+the trade-off is registry access/startup time instead of stale dependency volumes.
+Host and container modes can use different published ports.
+
+Stop host Vite before reinstalling host dependencies. Container installations are
+isolated from host `node_modules`. `make stop` stops all Compose services;
+`make frontend-docker-stop` stops only the Docker frontend. Production static
+hosting remains a separate decision; no production Vite deployment is proposed.

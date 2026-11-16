@@ -26,6 +26,9 @@ Observed 2026-11-16, 22:50 UTC. [Raw JSON](results/003-linked-interface.json).
 | Max | 65.9 |
 
 No speedup or 10-million-patent performance claim follows from these results.
+This recorded baseline predates the Figma visual refinement and numbered
+pagination. Later development-mode browser runs are regression checks, not
+replacement production timing baselines.
 
 ## Reproduce
 

@@ -1,5 +1,36 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Mozilla Text Variable", sans-serif;
+  --color-workspace: #2868e8;
+  --background-image-workspace-gradient: linear-gradient(90deg, #2b9cff 1.431%, #004e93 97.523%);
+  --color-workspace-content: #ffffff;
+  --color-muted: #52667c;
+  --color-evidence: #f2f7fc;
+  --color-selected: #e7f2ff;
+  --color-distribution: #d8eafa;
+}
+
 @plugin "daisyui" {
   themes: corporate --default;
+}
+
+@plugin "daisyui/theme" {
+  name: "corporate";
+  default: true;
+  --color-base-100: #ffffff;
+  --color-base-200: #f2f6fa;
+  --color-base-300: #d5e1ed;
+  --color-base-content: #172b43;
+  --color-primary: #2463b4;
+  --color-primary-content: #ffffff;
+  --color-neutral: #172b43;
+  --color-neutral-content: #ffffff;
+  --color-error: #fff3f2;
+  --color-error-content: #842f2a;
+  --radius-box: 0.5rem;
+  --radius-field: 0.375rem;
+  --radius-selector: 0.375rem;
+  --depth: 0;
+  --noise: 0;
 }
